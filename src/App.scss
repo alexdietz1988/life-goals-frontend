@@ -1,0 +1,85 @@
+@import 'bulma';
+@import '../node_modules/bulma-list/sass/bulma-list.sass';
+
+.hoverable:hover {
+    cursor: pointer;
+}
+
+main, header {
+    width: 80vw;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+main {
+    padding-block-end: 100px;
+}
+
+.navbar {
+    .navbar-brand {
+        display: flex;
+        align-items: center;
+    }
+    
+}
+
+.page-wrapper {
+    margin-block-end: 20px;
+
+    & > div {
+        margin: 20px 0;
+    }
+}
+
+footer {
+    text-align: center;
+}
+
+.entry {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+
+    .left-container {
+        display: flex;
+
+        .icon-container {
+            display: inline-block;
+            width: 60px;
+            display: flex;
+
+            & > * {
+                margin-right: 5px;
+            }
+        }
+
+        .entry-label {
+            width: 250px;
+ 
+        }
+    }
+    .right-container {
+        display: flex;
+        align-items: center;
+    }
+}
+
+.entry-form {
+    .inline-input {
+        display: flex;
+        align-items: center;
+        margin: 20px 0;
+
+        input {
+            margin: 0 5px;
+        }
+    }
+}
+
+.starred {
+    color: #FFD700;
+}
+
+.unstarred {
+    color: lightslategray;
+}
