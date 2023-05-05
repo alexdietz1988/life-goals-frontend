@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import _ from 'lodash';
 
 import { Area, Timescale } from '../../utilities/interfaces';
 import { timescales } from '../../utilities/dates';
@@ -7,16 +8,13 @@ import { timescales } from '../../utilities/dates';
 interface EntryFormUIProps {
     formData: FormData,
     setFormData: Function,
+
     type: 'goal' | 'note',
     editMode?: boolean,
-    parentAreas: Array<Area>,
-    childrenToDisplay: Array<Area>,
+    primaryTextRef: any,
+    handleFormAction: Function,
+    getAreas: { parentAreas: Area[], childrenToDisplay: Area[] },
     getDate: Function,
-    isDateMatch: Function,
-    restoreDefaults: Function,
-    submitText: string,
-    deleteEntry: Function,
-    pageVersion?: boolean,
 }
 
 interface FormData {
@@ -29,119 +27,149 @@ interface FormData {
     timescale: Timescale | undefined;
 }
 
-type RelativeTime = 'Now' | 'Later';
-
 export const EntryFormUI = ({ 
-    formData, setFormData, type, pageVersion, editMode,
-    parentAreas, childrenToDisplay, 
-    getDate, isDateMatch, 
-    restoreDefaults, deleteEntry, submitText }: EntryFormUIProps ) => {
-    const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-    
-    const toggleSomeday = (): void => {
-        setFormData((formData: FormData) => {
-            return {...formData, someday: !formData.someday, startDate: undefined}})
+    formData,
+    setFormData,
+    type,
+    editMode,
+    primaryTextRef,
+    handleFormAction,
+    getAreas,
+    getDate,
+}: EntryFormUIProps ) => {
+    const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
+    const [relativeTime, setRelativeTime] = useState<'Now' | 'Later'>('Now');
+    const location = useLocation();
+
+    const getStartDateLabel = (t?: Timescale, relativeTime?: string): string => {
+        if (!t) return 'Someday';
+        else if (t === 'life') return 'Life';
+        else if (t === 'day') return relativeTime === 'Now' ? 'Today' : 'Tomorrow';
+        else return (relativeTime === 'Now' ? 'This ' : 'Next ') + _.capitalize(t);
     }
 
-    const getStartDateLabel = (t: Timescale, relativeTime: string) => {
-        const labels = {
-            day: relativeTime === 'Now' ? 'Today' : 'Tomorrow',
-            week: relativeTime === 'Now' ? 'This Week' : 'Next Week',
-            month: relativeTime === 'Now' ? 'This Month' : 'Next Month',
-            quarter: relativeTime === 'Now' ? 'This Quarter' : 'Next Quarter',
-            decade: relativeTime === 'Now' ? 'This Decade' : 'Next Decade',
-            year: relativeTime === 'Now' ? 'This Year' : 'Next Year',
-            life: 'Life'
-        }
-        return labels[t as keyof typeof labels];
-    }
-    const [relativeTime, setRelativeTime] = useState('');
-    const handleSelectRelativeTime = (x: RelativeTime): void => {
-        setFormData((formData: FormData) => { 
-            return {...formData, 
-                timescale: 'day', 
-                startDate: getDate('day', x)
-            }});
-        setRelativeTime(relativeTime === x ? '' : x);
-    }
-
-    const handleSelectStartDate = (t: Timescale): void => {
+    const handleSelectStartDate = (t: Timescale, relativeTime: 'Now' | 'Later'): void => {
+        setRelativeTime(relativeTime);
         setFormData((formData: FormData) => { 
         return {...formData, 
             timescale: t, 
             startDate: getDate(t, relativeTime)}})
     }
 
-    const handleSelectAreaId = (areaId: string): void => {
-        setFormData((formData: FormData) => {
-            return {...formData, areaId: formData.areaId === areaId ? '' : areaId}});
-    }
-
     const renderArea = (area: Area, key: number) => (
         <div key={key} 
-            className={'tag hoverable ' + (formData.areaId === area._id && 'is-primary')} 
-            onClick={() => handleSelectAreaId(area._id)}>
+            className={'tag hoverable is-white ' + (formData.areaId === area._id && 'is-primary')} 
+            onClick={() => setFormData((formData: FormData) => {
+                return {...formData, areaId: formData.areaId === area._id ? '' : area._id}})}>
             {area.label}
-            {formData.areaId === area._id && <button className="delete is-small"></button>}
+            {formData.areaId === area._id && <div className="delete is-small"></div>}
         </div>)
 
-    return <div className='box'>
-            {(
-            <div>
-                <div className='buttons'>
-                {['Now','Later'].map((x, i) => (
-                    <div key={i} 
-                        className={'button ' + (relativeTime === x && 'is-primary')} 
-                        onClick={() => handleSelectRelativeTime(x as RelativeTime)}>{x}
-                    </div>
-                ))}
-                <div className={'button ' + (formData.someday && 'is-warning')} onClick={() => toggleSomeday()}>
-                        Someday
-                    </div>
+    return (
+        <form className='form control entry-form' onSubmit={e => handleFormAction('submit', e)}>
+            {type === 'goal' && (
+                <>
+                <h2>Add a goal</h2>
+                <div className='inline-input'>
+                    <input className='hoverable' type='checkbox' checked={formData.complete}
+                        onChange={() => setFormData((formData: FormData) => {
+                            return {...formData,  complete: !formData.complete}})} />
+                    <span className='icon hoverable'
+                        onClick={() => setFormData((formData: FormData) => {
+                            return {...formData, starred: !formData.starred}})}>
+                        <i className={'fas fa-star ' + (formData.starred ? 'starred' : 'unstarred')}/>
+                    </span>
+                    <input type='text' className='input' ref={primaryTextRef}
+                        placeholder='Enter your goal' defaultValue={formData.primaryText}
+                        />
                 </div>
+                </>)
+            }
 
-                {relativeTime !== '' && <div className='select'>
-                <select value={formData.timescale ? formData.timescale : ''} 
-                    onChange={e => handleSelectStartDate(e.target.value as Timescale)}>
-                    {timescales.map((t, i) => 
-                    <option key={i} value={t}
-                        className={'button ' + (isDateMatch(t as Timescale, relativeTime) && 'is-primary')}>
-                        {getStartDateLabel(t as Timescale, relativeTime)}
-                    </option>
-                    )}
-                </select>
-                </div>}
-            
-                <div className='tags are-medium'>
-                    <div className={'tag hoverable ' + (formData.areaId === '' && 'is-primary')} 
-                        onClick={() => handleSelectAreaId('')}>
-                        (None)
+            {type === 'note' && (
+            <>
+            <h2>Add a note</h2>
+            <textarea className='textarea hoverable' ref={primaryTextRef} defaultValue={formData.primaryText}
+                placeholder={'Tip: You can also include markdown, like:\n**Bold** or *italics*\n- New paragraph\n - [ ] Todo'}
+                />
+            </>
+            )}
+            <div className='select-date'>
+                <h2>When?</h2>
+                {(!formData.startDate && !formData.someday) && <>
+
+                <div className='dropdowns'>
+                    <div className='select'>
+                        <select
+                            onChange={e => handleSelectStartDate(e.target.value as Timescale, 'Now')}>
+                            <option>Now</option>
+                            {timescales.map((t, i) =>
+                            <option key={i} value={t}>
+                                {getStartDateLabel(t as Timescale, 'Now')}
+                            </option>)}
+                        </select>
                     </div>
-                    {parentAreas.map((area, i) => renderArea(area, i))}
+
+                    <div className='select'>
+                        <select
+                            onChange={e => e.target.value === 'someday' 
+                                ? setFormData((formData: FormData) => {
+                                    return { ...formData, someday: true };}) 
+                                : handleSelectStartDate(e.target.value as Timescale, 'Later')
+                                }>
+                            <option>Later</option>
+                            {timescales.slice(0,-1).map((t, i) =>
+                            <option key={i} value={t}>
+                                {getStartDateLabel(t as Timescale, 'Later')}
+                            </option>)}
+                            <option value={'someday'}>
+                                Someday
+                            </option>
+                        </select>
+                    </div>
                 </div>
-                <div className='tags are-medium'>
-                    {childrenToDisplay.map((area, i) => renderArea(area, i))}
+                </>}
+
+                {(formData.startDate || formData.someday) && 
+                <div className='tag is-medium is-warning hoverable'
+                    onClick={() => setFormData((formData: FormData) => {
+                        return {...formData, timescale: undefined, startDate: undefined, someday: false}})}>
+                    {getStartDateLabel(formData.timescale, relativeTime)}
+                    <span className='icon'><i className="delete is-small"/></span>
+                </div>}
+            </div>
+        
+            <div className='tags are-medium'>
+                <div className={'tag hoverable is-white ' + (formData.areaId === '' && 'is-primary')} 
+                    onClick={() => setFormData((formData: FormData) => {
+                        return {...formData, areaId: ''}})}>
+                    (None)
                 </div>
-                <div className='buttons'>
-                    <button type='submit' className='button is-link'>{submitText}</button>
-                    {pageVersion
-                    ? <Link className='button' to='/'>Cancel</Link>
-                    : <div className='button' onClick={() => restoreDefaults()}>Cancel</div>}
-                    {editMode && <div className='button is-danger is-light' onClick={() => setShowConfirmDelete(true)}>Delete</div>}
-                    {showConfirmDelete &&
-                    <div className='modal is-active'>
-                        <div className='modal-background'></div>
-                        <div className='modal-content'>
-                            <div className='box'>
-                                <h2 className='title is-5'>Are you sure you want to delete this {type}?</h2>
-                                <div className='button is-danger' onClick={() => deleteEntry()}>Yes, Delete It</div>
-                                <div className='button' onClick={() => setShowConfirmDelete(false)}>No, Back to Edit</div>
-                            </div>
+                {getAreas.parentAreas.map((area, i) => renderArea(area, i))}
+            </div>
+            <div className='tags are-medium'>
+                {getAreas.childrenToDisplay.map((area, i) => renderArea(area, i))}
+            </div>
+
+            <div className='buttons'>
+                <button type='submit' className='button is-link'>{editMode ? 'Update' : 'Add'}</button>
+                {location.pathname === '/new-goal' || location.pathname === '/new-note'
+                ? <Link className='button' to='/'>Cancel</Link>
+                : <div className='button' onClick={() => handleFormAction('cancel')}>Cancel</div>}
+                {editMode && <div className='button is-danger is-light' onClick={() => setShowConfirmDelete(true)}>Delete</div>}
+
+                {showConfirmDelete &&
+                <div className='modal is-active'>
+                    <div className='modal-background'></div>
+                    <div className='modal-content'>
+                        <div className='box'>
+                            <h2 className='title is-5'>Are you sure you want to delete this {type}?</h2>
+                            <div className='button is-danger' onClick={() => handleFormAction('delete')}>Yes, Delete It</div>
+                            <div className='button' onClick={() => setShowConfirmDelete(false)}>No, Back to Edit</div>
                         </div>
                     </div>
-                    }
-                </div>
+                </div>}
             </div>
-            )}
-    </div>
+        </form>
+        )
 }

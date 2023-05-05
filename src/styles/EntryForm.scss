@@ -1,0 +1,67 @@
+.entry-form {
+    background-color: hsl(0, 0%, 95%);
+    border-radius: 1%;
+    padding: 20px;
+    margin-block-end: 10px;
+
+    h2 {
+        font-weight: bold;
+        font-size: 0.9em;
+    }
+
+    .inline-input {
+        display: flex;
+        align-items: center;
+        margin: 20px 0;
+
+        input {
+            margin: 0 5px;
+        }
+    }
+
+    textarea {
+        margin-block-end: 15px;
+    }
+
+    .select-date {
+        margin-block-end: 20px;
+
+        * {
+            margin-block-end: 15px;
+        }
+
+        *:not(h2) {
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .tag {
+            padding: 20px 10px;
+            display: flex;
+            align-items: center;
+
+            span.icon {
+                display: inline-block;
+                margin: 0;
+                margin-left: 5px;
+
+                display: flex;
+                align-items: center;
+
+                * {
+                    margin: 0;
+                }
+            }
+        }
+
+        .dropdowns {
+            margin-block: 0;
+
+            .select {
+                @media screen and (min-width: 600px) {
+                    margin-inline-end: 10px;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,55 @@
+@import 'bulma';
+@import '../../node_modules/bulma-list/sass/bulma-list.sass';
+
+.hoverable:hover {
+    cursor: pointer;
+}
+
+main, header {
+    width: 80vw;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+$breakpoint: 400px;
+
+main {
+    padding-block-end: 100px;
+}
+
+.sign-in {
+    margin-block: 20px;
+    
+    input {
+        margin-block-end: 20px;
+    }
+}
+
+.mobile-only, .mobile-only * {
+    display: none;
+    @media screen and (max-width: 400px) {
+        display: block;
+    }
+}
+
+.desktop-only, .desktop-only * {
+    display: none;
+
+    @media screen and (min-width: 400px) {
+        display: inline-block;
+        height: auto
+    }
+}
+
+.page-wrapper {
+    margin-block-end: 20px;
+
+    & > div {
+        margin: 20px 0;
+    }
+}
+
+footer {
+    text-align: center;
+}
+

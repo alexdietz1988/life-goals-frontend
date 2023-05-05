@@ -1,0 +1,79 @@
+.container {
+    & > div {
+        margin-block-end: 10px;
+    }
+
+    .areas-tags {
+        .manage-button {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .parent-areas, .child-areas {
+            display: flex;
+            flex-wrap: wrap;
+
+            & > div {
+                margin-right: 10px;
+                margin-bottom: 10px;
+            }
+        }
+    }
+}
+
+.area-info {
+    & > div {
+        margin-block-end: 20px;
+    }
+    .area-info-label {
+        display: flex;
+        align-items: center;
+        margin-block-end: 10px;
+        .area-label {
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 10px;
+        }
+    }
+    .notes {
+        .notes-label {
+            color: gray;
+            font-size: smaller;
+        }
+
+        .notes-content {
+            font-size: smaller;
+        }
+    }
+}
+
+.manage-areas {
+    & > div:first-child {
+        margin-block-end: 20px;
+    }
+    .areas-list {
+        display: flex;
+        flex-direction: column;
+        row-gap: 20px;
+        max-width: 300px;
+    
+        .area {
+            .editable-area {
+                width: 100%;
+                display: flex;
+                align-items: center;
+            }
+            .area-label {
+                width: 100%;
+            }
+        }
+
+        .parent .area-label {
+            font-weight: bold;
+        }
+        
+        .child {
+            margin-left: 20px;
+        }
+    }
+}

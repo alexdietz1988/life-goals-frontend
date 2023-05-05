@@ -165,9 +165,6 @@ export const FocusView = ({ defaultTimes, setDefaultTimes }: { defaultTimes: boo
         startDate={getBroaderTimescaleStart()}
       />
     }
-
-    <TimeSection />
-    <TimeSection someday={true} />
   </>
   )
 }

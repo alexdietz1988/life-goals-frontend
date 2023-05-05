@@ -1,15 +1,21 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useRef, FormEvent } from 'react';
+import { useNavigate, useLocation } from 'react-router';
+
 import { UserContext, DataContext, SettingsContext } from '../../App';
-import { Area, Entry, Data, Settings, Timescale } from '../../utilities/interfaces';
+import { Area, Entry, Data, Settings, Timescale, UserContextInterface } from '../../utilities/interfaces';
 import { backend } from '../../utilities/backend';
 
 import { EntryFormUI } from './EntryFormUI';
 
 interface EntryFormProps {
+    selectedType?: 'goal' | 'note',
     entry?: Entry
     setEntryIdToEdit?: Function,
-    selectedType?: 'goal' | 'note',
-    pageVersion?: boolean,
+    setShowEntryForm?: Function,
+    
+    timescale?: Timescale,
+    startDate?: Date,
+    someday?: boolean,
 }
 
 interface FormData {
@@ -24,13 +30,28 @@ interface FormData {
     createdAt: Date,
 }
 
-export const EntryForm = ({ entry, setEntryIdToEdit, selectedType, pageVersion }: EntryFormProps) => {
-    let type = 'goal';
-    if (entry && entry.type) type = entry.type;
-    if (selectedType) type = selectedType;
-    const { areas } = useContext(DataContext) as Data;
+export const EntryForm = ({ 
+    selectedType, 
+    entry, 
+    setEntryIdToEdit, 
+    setShowEntryForm, 
+    timescale, 
+    startDate, 
+    someday = false
+}: EntryFormProps) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { areas, selectedAreaId } = useContext(DataContext) as Data;
     const { setLoading } = useContext(SettingsContext) as Settings;
-    const userId = useContext(UserContext);
+    const { userId } = useContext(UserContext) as UserContextInterface;
+    const primaryTextRef = useRef(null as any);
+
+    const getFormType = () => {
+        if (selectedType) return selectedType;
+        else if (entry && entry.type) return entry.type;
+        else return 'goal';
+    }
+    const type = getFormType();
 
     const getEntryStartDate = (entry: Entry) => {
         if (entry.startDate) {
@@ -41,154 +62,100 @@ export const EntryForm = ({ entry, setEntryIdToEdit, selectedType, pageVersion }
         }
         else return new Date(0);
     }
-    
-    const [expandForm, setExpandForm] = useState(Boolean(entry) || pageVersion);
-    const formDefaults: FormData = {
+
+    const [formData, setFormData] = useState<FormData>({ 
         primaryText: entry && entry.primaryText ? entry.primaryText : '',
         complete: entry && entry.complete ? entry.complete : false,
         starred: entry ? entry.starred : false,
-        someday: entry ? entry.someday : false,
+        someday: entry ? entry.someday : someday,
 
-        timescale: entry && entry.timescale ? entry.timescale : undefined,
-        startDate: entry && entry.startDate ? getEntryStartDate(entry) : undefined,
-        areaId: entry && entry.areaId ? entry.areaId : '',
+        timescale: entry && entry.timescale ? entry.timescale : timescale,
+        startDate: entry && entry.startDate ? getEntryStartDate(entry) : startDate,
+        areaId: entry && entry.areaId ? entry.areaId : selectedAreaId,
 
         secondaryText: '',
         createdAt: entry && entry.createdAt ? entry.createdAt : new Date(),
-    }
-    const [formData, setFormData] = useState(formDefaults);
+    });
 
-    const hasParent = (area: Area) => area.parent && area.parent !== '';
-    const parentAreas = areas.filter((area: Area) => !hasParent(area));
-    const siblingIsSelected = (area: Area) => {
-        const siblingIds = areas.filter((a: Area) => a.parent === area.parent).map((a: Area) => a._id);
-        if (siblingIds.some(id => formData.areaId === id)) return true;
-    }
-    const childrenToDisplay = areas.filter((area: Area) => 
-        hasParent(area) && 
-        (area.parent && formData.areaId === area.parent || 
-        formData.areaId === area._id ||
-        siblingIsSelected(area)));
-    
-    const postEntry = async () => {
-        console.log(formData);
-        if (entry) await backend.put('entry', {entryId: entry._id, userId, type, ...formData});
-        else await backend.post('entry', {userId, type, ...formData});
-        setLoading(true);
-        if (setEntryIdToEdit) setEntryIdToEdit('');
-    }
-
-    const deleteEntry = async () => {
-        if (entry) await backend.delete(entry.type, { data: { entryId: entry._id } });
-    }
-
-    const restoreDefaults = () => {
-        setFormData(formDefaults);
-        if (setEntryIdToEdit) setEntryIdToEdit('');
-        setExpandForm(false);
+    const getAreas = () => {
+        const hasParent = (area: Area) => area.parent && area.parent !== '';
+        const parentAreas = areas.filter((area: Area) => !hasParent(area));
+        const siblingIsSelected = (area: Area) => {
+            const siblingIds = areas.filter((a: Area) => a.parent === area.parent).map((a: Area) => a._id);
+            if (siblingIds.some(id => formData.areaId === id)) return true;
+        }
+        const childrenToDisplay = areas.filter((area: Area) => 
+            hasParent(area) && 
+            (area.parent && formData.areaId === area.parent || 
+            formData.areaId === area._id ||
+            siblingIsSelected(area)));
+        return { parentAreas, childrenToDisplay };
     }
 
     const getDate = (t: Timescale, relativeTime: 'Now' | 'Later'): Date | undefined => {
-        const [day, week, month, quarter, year, decade] = [new Date(), new Date(), new Date(), new Date(), new Date(), new Date()];
-
-        if (relativeTime === 'Later') day.setDate(day.getDate() + 1);
-
-        if (relativeTime === 'Now') week.setDate(week.getDate() - week.getDay());
-        else week.setDate(week.getDate() - week.getDay() + 7);
-
-        month.setDate(1);
-        if (relativeTime === 'Later') month.setMonth(month.getMonth() + 1);
-
-        if (relativeTime === 'Now') quarter.setMonth(quarter.getMonth() - quarter.getMonth() % 3);
-        else quarter.setMonth(quarter.getMonth() - quarter.getMonth() % 3 + 3);
-        quarter.setDate(1);
-
-        if (relativeTime === 'Now') {
-            year.setMonth(0);
-            year.setDate(1);
-        } else {
-            year.setMonth(0);
-            year.setDate(1);
-            year.setFullYear(year.getFullYear() + 1);
+        const d = new Date();
+        const isNow = relativeTime === 'Now';
+        if (t === 'day' && !isNow) {
+            d.setDate(d.getDate() + 1);
+        } else if (t === 'week') {
+            const weekStart = d.getDate() - d.getDay();
+            d.setDate(isNow ? weekStart : weekStart + 7);
+        } else if (t === 'month') {
+            d.setDate(1);
+            if (!isNow) d.setMonth(d.getMonth() + 1);
+        } else if (t === 'quarter') {
+            d.setDate(1);
+            const quarterStart = d.getMonth() - d.getMonth() % 3;
+            d.setMonth(isNow ? quarterStart : quarterStart + 3);
+        } else if (t === 'year') {
+            d.setMonth(0);
+            d.setDate(1);
+            if (isNow) d.setFullYear(d.getFullYear() + 1);
+        } else if (t === 'decade') {
+            d.setMonth(0);
+            d.setDate(1);
+            const decadeStart = d.getFullYear() - d.getFullYear() % 10;
+            d.setFullYear(isNow ? decadeStart : decadeStart + 10)
+        } else if (t === 'life') {
+            return undefined;
         }
-
-        if (relativeTime === 'Now') {
-            decade.setFullYear(decade.getFullYear() - decade.getFullYear() % 10);
-            decade.setMonth(0);
-            decade.setDate(1);
-        } else {
-            decade.setFullYear(decade.getFullYear() - decade.getFullYear() % 10 + 10);
-            decade.setMonth(0);
-            decade.setDate(1);
-        }
-
-        const dates = { day, week, month, year, quarter, decade, life: undefined};
-        if (dates[t as keyof typeof dates]) return dates[t as keyof typeof dates];
+        return d;
     }
 
-    const isDateMatch = (t: Timescale, relativeTime: 'Now' | 'Later') => {
-        const convertDateToString = (date?: string | undefined) => {
-            if (!date) return undefined;
-            const year = date.slice(0,4);
-            const month = date.slice(4,6) + 1;
-            const day = date.slice(6,8);
-            return `${year}-${month}-${day}`;
+    const deleteEntry = async () => {
+        if (entry) {
+            await backend.delete('entry', { data: { entryId: entry._id } });
+            if (setEntryIdToEdit) setEntryIdToEdit('');
+            setLoading(true);
         }
-        if (!formData.startDate) return false;
-        const formDateAsString = convertDateToString(formData.startDate.toString());
-        const selectedDate = getDate(t, relativeTime);
-        if (!selectedDate) return false;
-        const selectedDateAsString = convertDateToString(selectedDate.toString());
-        return formData.timescale === t && formDateAsString === selectedDateAsString;
     }
 
-    const handleToggle = (field: string): void => {
-        setFormData((formData: FormData) => {
-            return {...formData, [field]: !formData[field as keyof FormData]}})
+    const postEntry = async (e: FormEvent) => {
+        e.preventDefault();
+        const primaryText = primaryTextRef.current.value;
+        if (entry) await backend.put('entry', {entryId: entry._id, userId, type, ...formData, primaryText});
+        else await backend.post('entry', {userId, type, ...formData, primaryText});
+        setLoading(true);
+        if (setEntryIdToEdit) setEntryIdToEdit('');
+        if (location.pathname === '/new-goal' || location.pathname === '/new-note') navigate('/');
     }
 
-    const handleEnterPrimaryText = (text: string): void => {
-        setFormData((formData: FormData) => {
-            return {...formData, primaryText: text}})
+    const handleFormAction = (action: 'submit' | 'cancel' | 'delete', e?: FormEvent) => {
+        if (action === 'submit' && e) postEntry(e);
+        else if (action === 'delete') deleteEntry();
+        else if (action === 'cancel' && setShowEntryForm) setShowEntryForm(false);
     }
 
     return (
-        <form className='form control entry-form' onSubmit={e => {
-            e.preventDefault();
-            postEntry();
-            restoreDefaults();
-            }}>
-            {type === 'goal' && (
-                <div className='inline-input' onFocus={() => setExpandForm(true)}>
-                    <input className='hoverable' type='checkbox' checked={formData.complete} onChange={() => handleToggle('complete')} />
-                    <span className='icon hoverable' onClick={() => handleToggle('starred')}>
-                        <i className={'fas fa-star ' + (formData.starred ? 'starred' : 'unstarred')}/>
-                    </span>
-                    <input type='text' className='input'
-                        placeholder='What do you want to accomplish?' value={formData.primaryText}
-                        onChange={e => handleEnterPrimaryText(e.target.value)} />
-                </div>)
-            }
-
-            {type === 'note' && (
-            <input type='text' className='textarea' onFocus={() => setExpandForm(true)}
-                placeholder='Add a new note' value={formData.primaryText}
-                onChange={e => handleEnterPrimaryText(e.target.value)} />
-            )}
-            {expandForm && (type === 'goal' || type === 'note') && <EntryFormUI 
-                formData={formData} 
-                setFormData={setFormData} 
-                type={type}
-                editMode={!!entry}
-                parentAreas={parentAreas}
-                childrenToDisplay={childrenToDisplay}
-                getDate={getDate}
-                isDateMatch={isDateMatch}
-                restoreDefaults={restoreDefaults}
-                submitText={entry ? 'Update' : 'Add'}
-                deleteEntry={deleteEntry}
-                pageVersion={pageVersion}
-                />}
-        </form>
+        <EntryFormUI 
+            formData={formData} 
+            setFormData={setFormData} 
+            type={type as 'goal' | 'note'}
+            editMode={!!entry}
+            primaryTextRef={primaryTextRef}
+            getAreas={getAreas()}
+            getDate={getDate}
+            handleFormAction={handleFormAction}
+            />
     )
 }

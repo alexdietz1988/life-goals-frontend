@@ -1,10 +1,15 @@
-import { Link, Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { useState, useEffect, createContext } from 'react';
 
-import './App.scss';
+import './styles/App.scss';
+import './styles/Header.scss';
+import './styles/Areas.scss';
+import './styles/Entries.scss';
+import './styles/EntryForm.scss';
 import { backend } from './utilities/backend';
 import { Entry, Area } from './utilities/interfaces';
 
+import { Header } from './components/Header';
 import { SignIn } from './components/SignIn';
 import { Areas } from './components/areas/Areas';
 import { ManageAreas } from './components/areas/ManageAreas';
@@ -20,7 +25,6 @@ function App() {
   const [userId, setUserId] = useState('');
   const [loading, setLoading] = useState(false);
   const [defaultTimes, setDefaultTimes] = useState(false);
-  const path = useLocation().pathname;
 
   const [entries, setEntries] = useState([] as Array<Entry>);
   const [areas, setAreas] = useState([] as Array<Area>);
@@ -55,27 +59,12 @@ function App() {
 
   return (
     <>
-    <UserContext.Provider value={userId}>
-    <DataContext.Provider value={{areas, entries: entriesInSelectedArea}}>
-    <SettingsContext.Provider value={{setLoading}}>
-    <header>
-      <nav className='navbar'>
-        <div className='navbar-brand'>
-          <div className='navbar-item'><Link to='/' className='title is-5'>Life Goals</Link></div>
-          {userId && 
-          <>
-            <div className='navbar-item'><Link to='/' onClick={() => setDefaultTimes(true)}>Now</Link></div>
-            <div className='navbar-item'><Link to='/all-time'>All Time</Link></div>
-
-            <div className='navbar-item'><Link to={path === '/new-goal' ? '/' : '/new-goal'} className='button'>+ Goal</Link></div>
-            <div className='navbar-item'><Link to={path === '/new-note' ? '/' : '/new-note'} className='button'>+ Note</Link></div>
-            <div className='navbar-item'><SignIn setUserId={setUserId} /></div>
-          </>}
-        </div>
-      </nav>
-    </header>
+    <UserContext.Provider value={{ userId, setUserId }}>
+    <DataContext.Provider value={{ areas, selectedAreaId, entries: entriesInSelectedArea }}>
+    <SettingsContext.Provider value={{ setLoading, setDefaultTimes }}>
+    <Header />
     <main>
-      {!userId && <SignIn setUserId={setUserId} />}
+      {!userId && <SignIn />}
       {userId && (
       <>
       <Routes>
@@ -83,8 +72,8 @@ function App() {
         <Route path='/' element={<PageWrapper children={
           <FocusView defaultTimes={defaultTimes} setDefaultTimes={setDefaultTimes} />} />} />
         <Route path='/manage-areas' element={<ManageAreas />} />
-        <Route path='/new-goal' element={<EntryForm selectedType='goal' pageVersion />} />
-        <Route path='/new-note' element={<EntryForm selectedType='note' pageVersion />} />
+        <Route path='/new-goal' element={<EntryForm selectedType='goal' />} />
+        <Route path='/new-note' element={<EntryForm selectedType='note' />} />
       </Routes>
     </>)
       }

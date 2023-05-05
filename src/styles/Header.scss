@@ -1,0 +1,76 @@
+@import 'App.scss';
+
+header {
+    margin-block-start: 25px;
+
+        .title-mobile, .title-desktop {
+            color: black;
+            font-weight: bold;
+        }
+
+        .title-mobile {
+            text-align: center;
+        }
+
+        .banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .column {
+                padding-bottom: 0;
+            }
+        }
+
+        nav.mobile-only {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            div:not(.new-entry-button) {
+                width: 90px;
+            }
+
+            .new-entry-buttons {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-inline: 5px;
+            }
+
+            .new-entry-button {
+                width: 40px;
+
+                span {
+                    display: flex;
+                    align-items: center;
+                }
+            }
+        }
+
+        nav.desktop-only {
+            display: flex;
+            justify-content: space-between;
+            align-items: center; 
+
+            .navbar-brand {
+                display: none;
+
+                @media screen and (min-width: $breakpoint) {
+                    display: flex;
+                    align-items: center;
+                }
+                
+                .new-entry-button {
+                    display: none;
+
+                    @media screen and (min-width: $breakpoint) {
+                        display: flex;
+                        display: inline-block;
+                        width: 40px;
+                        margin-right: 12.5px;
+                    }
+                }
+            }
+        }
+}

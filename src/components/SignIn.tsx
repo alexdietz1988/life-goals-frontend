@@ -1,59 +1,44 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useRef } from 'react';
 
 import { UserContext } from '../App';
 import { backend } from '../utilities/backend';
+import { UserContextInterface } from '../utilities/interfaces';
 
-export const SignIn = ({ setUserId }: { setUserId: Function }) => {
-  const userId = useContext(UserContext);
-  const [usernameInput, setUsernameInput] = useState('');
-  const [passwordInput, setPasswordInput] = useState('');
-  const [signinType, setSigninType] = useState('login');
+export const SignIn = () => {
+  const { setUserId } = useContext(UserContext) as UserContextInterface;
+  const usernameInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
   const [warning, setWarning] = useState('')
 
-  const postCredentials = async () => {
+  const postCredentials = async (signinType: 'login' | 'signup') => {
     const response = await backend.post(`auth/${signinType}`, { 
-      username: usernameInput, 
-      password: passwordInput 
+      username: usernameInputRef.current?.value, 
+      password: passwordInputRef.current?.value 
     })
     if (response.data === 'Invalid username or password' || response.data === 'User already exists') {
       setWarning(response.data);
     }
     else if (response.status === 200) {
       setUserId(response.data);
-      setSigninType('login');
       setWarning('');
     }
   }
 
-  return userId
-    ? <button className='button is-warning is-light' onClick={() => setUserId('')}>Logout</button>
-    : (
-    <form className='form control' onSubmit={e => {
-      e.preventDefault();
-      postCredentials();
-      }}>
-      <input className='input is-inline mr-2' id='username' type='text' placeholder='username' 
-        onChange={(e) => setUsernameInput(e.target.value)} />
-      <input className='input is-inline mr-2' id='password' type='password' placeholder='password' 
-        onChange={(e) => setPasswordInput(e.target.value)} />
-      <div className='buttons is-inline has-addons mr-3'>
-        <button 
-            className={'button ' + (signinType === 'login' && 'is-primary')}
-            onClick={e => {
-              e.preventDefault(); 
-              setSigninType('login');
-              }}>
-            Login</button>
-        <button 
-            className={'button ' + (signinType === 'signup' && 'is-primary')}
-            onClick={e => {
-              e.preventDefault(); 
-              setSigninType('signup');
-              }}>
-            Sign Up</button>
+  return (
+    <div className='sign-in'>
+      <input className='input' ref={usernameInputRef} id='username' type='text' placeholder='username' />
+      <input className='input' ref={passwordInputRef} id='password' type='password' placeholder='password' />
+      <div className='buttons'>
+        <div 
+            className='button is-link'
+            onClick={() => postCredentials('login')}>
+            Login</div>
+        <div 
+            className='button'
+            onClick={e => postCredentials('signup')}>
+            Sign Up</div>
       </div>
-      <button type='submit' className='button'>Submit</button>
       <p>{warning}</p>
-    </form>
-    );
+    </div>
+  )
 }

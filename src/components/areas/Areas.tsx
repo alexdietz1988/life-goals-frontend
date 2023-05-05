@@ -1,7 +1,6 @@
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
-import './Areas.scss';
 import { DataContext } from '../../App';
 import { AreaInfo } from './AreaInfo';
 import { Area, Data } from '../../utilities/interfaces';
@@ -16,8 +15,8 @@ export const Areas = ({ selectedAreaId, setSelectedAreaId }: { selectedAreaId: s
     return (
         <div className='container'>
             <div className='areas-tags'>
-                <div>
-                    <Link to='/manage-areas' className='tag is-medium is-link is-light hoverable'>
+                <div className='parent-areas'>
+                    <Link to='/manage-areas' className='manage-button tag is-medium is-link is-light hoverable'>
                         {areas.length > 0 ? 'Manage' : 'Add a New Life Area'}
                     </Link>
                     {parentAreas.map((area: Area, i) =>
@@ -28,7 +27,7 @@ export const Areas = ({ selectedAreaId, setSelectedAreaId }: { selectedAreaId: s
                     )}
                 </div>
                 {childrenToDisplay.length > 0 &&
-                <div>
+                <div className='child-areas'>
                     {childrenToDisplay.map((area: Area, i) =>
                     <div key={i}
                         className={'tag is-medium hoverable ' + (selectedAreaId === area._id && 'is-primary')}

@@ -24,13 +24,20 @@ export interface Area {
 
 export interface Data {
     entries: Array<Entry>,
+    selectedAreaId: string,
     areas: Array<Area>,
+}
+
+export interface UserContextInterface {
+    userId: string,
+    setUserId: Function,
 }
 
 export interface Settings {
     timescale: string,
     setTimescale: Function,
     timePeriodStart: object, 
-    setTimePeriodStart: Function, 
+    setTimePeriodStart: Function,
+    setDefaultTimes: Function,
     setLoading: Function
 }

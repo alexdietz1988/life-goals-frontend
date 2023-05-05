@@ -58,12 +58,24 @@ export const AllTime = () => {
                 return (
                 <div key={i} className='block my-6'>
                     <div className='block'>
+                        <h2 className='title is-5 has-text-info timescale-label'>
+                            {_.capitalize(t) + 's'}
+                        </h2>
+                    </div>
+                    {displayTimescale(t)}
+                </div>)}
+        )}
+
+        {entries.filter(e => e.timescale === 'life').length > 0 && 
+        <div className='block my-6'>
+            <div className='block'>
+                <div className='block'>
                     <h2 className='title is-5 has-text-info timescale-label'>
-                        {t === 'life' ? 'Life' : _.capitalize(t) + 's'}
+                        Life
                     </h2>
                 </div>
-                {displayTimescale(t)}
-            </div>)}
-        )}
+            </div>
+            <TimeSection timescale='life'/>
+        </div>}
         </>)
 }

@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 
 import { UserContext, DataContext, SettingsContext } from '../../App';
-import { Area, Data, Settings } from '../../utilities/interfaces';
+import { Area, Data, Settings, UserContextInterface } from '../../utilities/interfaces';
 import { backend } from '../../utilities/backend';
 
 interface AreaFormProps {
@@ -10,7 +10,7 @@ interface AreaFormProps {
 }
 
 export const AreaForm = ({ area, setAreaIdToEdit }: AreaFormProps) => {
-    const userId = useContext(UserContext);
+    const { userId } = useContext(UserContext) as UserContextInterface;
     const areasToDisplay = (useContext(DataContext) as Data).areas.filter((a: Area) => !area || a._id !== area._id);
     const { setLoading } = useContext(SettingsContext) as Settings;
     const [expandForm, setExpandForm] = useState(Boolean(area));

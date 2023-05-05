@@ -1,7 +1,7 @@
 import { Fragment, useState, useContext } from 'react';
 
 import { DataContext } from '../../App';
-import { Entry, Data } from '../../utilities/interfaces';
+import { Entry, Data, Timescale } from '../../utilities/interfaces';
 import { dayNames, monthNames } from '../../utilities/dates';
 import { EntryForm } from './EntryForm';
 import { RenderEntry } from './RenderEntry';
@@ -16,6 +16,8 @@ interface TimeSectionProps {
 
 export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jumpToTimescale }: TimeSectionProps) => {
     const [ entryIdToEdit, setEntryIdToEdit ] = useState('');
+    const [showEntryForm, setShowEntryForm] = useState(false);
+    const [entryFormType, setEntryFormType] = useState< 'goal' | 'note' | undefined>(undefined);
     const { entries } = useContext(DataContext) as Data;
 
     const dateMatch = (entry: Entry) => {
@@ -111,14 +113,41 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
             setEntryIdToEdit={setEntryIdToEdit}/>}
         </Fragment>)
 
-    return (
-    <div className='box'>
+    const handleToggleEntryForm = (type: 'goal' | 'note'): void => {
+        if (!showEntryForm) {
+            setShowEntryForm(true);
+            setEntryFormType(type);
+        } else if (showEntryForm && entryFormType === type) {
+            setShowEntryForm(false);
+            setEntryFormType(undefined);
+        } else {
+            console.log('a')
+            setEntryFormType(type);
+        }
+    }
 
-        <div className='block'>
-            <h2 className={'title is-5 ' + (isCurrentFocus === false && 'hoverable has-text-link')} onClick={() => {
+    return (
+    <div className='box time-section'>
+
+        <div className='block header'>
+            <h2 className={'time-section-title is-inline is-5 mr-3 ' + (isCurrentFocus === false && 'hoverable has-text-link')} onClick={() => {
                 if (jumpToTimescale && isCurrentFocus === false) jumpToTimescale(timescale)}
                 }>{label()}</h2>
+            <div className='button mr-2' onClick={() => handleToggleEntryForm('goal')}>
+                +
+            </div>
+            <div className='button new-entry-button' onClick={() => handleToggleEntryForm('note')}>
+                <span className='icon'><i className='fa-regular fa-note-sticky' /></span>
+            </div>
         </div>
+
+        {showEntryForm && <EntryForm 
+            selectedType={entryFormType} 
+            startDate={startDate} 
+            timescale={timescale as Timescale} 
+            someday={someday} 
+            setShowEntryForm={setShowEntryForm}
+        />}
 
         {starredGoals.map((entry: Entry, i: number) => renderEntryOrForm(entry, i))}
         {unstarredGoals.map((entry: Entry, i: number) => renderEntryOrForm(entry, i))}

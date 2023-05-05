@@ -1,19 +1,25 @@
-import { FormEvent, useRef, useState, useEffect } from 'react';
+import { FormEvent, useRef, useState, useEffect, useContext } from 'react';
 import _ from 'lodash';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
+import { DataContext } from '../../App';
 import { backend } from '../../utilities/backend';
+import { Data } from '../../utilities/interfaces';
 
 type AreaStatus = '' | 'green' | 'yellow' | 'red';
 
-interface AreaInfo {
+interface AreaInfoInterface {
     _id: string,
     areaStatus: string,
     notes: string,
 }
 
 export const AreaInfo = ({ selectedAreaId }: { selectedAreaId: string}) => {
+    const { areas } = useContext(DataContext) as Data;
+    const areaLabel = areas.find(area => area._id === selectedAreaId)?.label;
     const [isEditing, setIsEditing] = useState(false);
-    const [areaInfo, setAreaInfo] = useState({ _id: '', areaStatus: '', notes: ''} as AreaInfo);
+    const [areaInfo, setAreaInfo] = useState({ _id: '', areaStatus: '', notes: ''} as AreaInfoInterface);
     const textareaRef = useRef(null as any);
     const [newStatus, setNewStatus] = useState('');
     const getClassName = (areaStatus: string) => {
@@ -38,16 +44,32 @@ export const AreaInfo = ({ selectedAreaId }: { selectedAreaId: string}) => {
 
     return (
     <>
-        {!isEditing && 
-        <div onClick={() => setIsEditing(true)}>
-            {areaInfo && <div className={`tag is-medium hoverable ${getClassName(areaInfo.areaStatus)}`}>{_.capitalize(areaInfo.areaStatus)}</div>}
-            <div>{areaInfo && areaInfo.notes}</div>
+        {(!isEditing && areaInfo) &&
+        <div className='box area-info' onClick={() => setIsEditing(true)}>
+            <div className='area-info-label'>
+                <div className='area-label'>{areaLabel}</div>
+                <div className={`tag is-medium hoverable ${getClassName(areaInfo.areaStatus)}`}>
+                    {areaInfo.areaStatus ? _.capitalize(areaInfo.areaStatus) : 'Set Status'}
+                </div>
+            </div>
+            <div className='notes'>
+            <div className='notes-label hoverable'>Notes</div>
+            <div className='notes-content'>
+                {areaInfo.notes 
+                    ? <ReactMarkdown remarkPlugins={[remarkGfm]} children={areaInfo.notes} /> 
+                    : <div className='textarea is-small content'>
+                        <p>Write some notes about this area here.</p>
+                    </div>
+                    }
+                </div>
+            </div>
+                
         </div>}
 
         {isEditing && 
-        <form className='form control' onSubmit={e => onSubmit(e)}>
-            <div>
-                <span className='tag is-medium mr-2 is-light'><strong>Status</strong></span>
+        <form className='form control box area-info' onSubmit={e => onSubmit(e)}>
+            <div className='area-info-label'>
+                <div className='area-label'>{areaLabel}</div>
                 <div className='tags are-medium is-inline has-addons'>
                 {['green', 'yellow', 'red'].map((color, i) => {
                     return <div key={i}
@@ -56,11 +78,15 @@ export const AreaInfo = ({ selectedAreaId }: { selectedAreaId: string}) => {
                         onClick={() => setNewStatus(newStatus => newStatus === color ? '' : color as AreaStatus)}>{_.capitalize(color)}</div>})}
                 </div>
             </div>
-
-            <textarea ref={textareaRef} className='input textarea' defaultValue={areaInfo.notes} />
+            
+            <div className='notes'>
+                <div className='notes-label hoverable'>Notes</div>
+                <textarea ref={textareaRef} className='input textarea notes-content' defaultValue={areaInfo.notes} placeholder={'Tip: You can also include markdown, like:\n**Bold** or *italics*\n- New paragraph\n - [ ] Todo'}/>
+            </div>
+            
             <div className='buttons'>
-            <button type='submit' className='button is-link'>Save Changes</button>
-            <div className='button' onClick={() => setIsEditing(false)}>Cancel</div>
+                <button type='submit' className='button is-link'>Save Changes</button>
+                <div className='button' onClick={() => setIsEditing(false)}>Cancel</div>
             </div>
         </form>}
     </>)

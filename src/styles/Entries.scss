@@ -1,0 +1,89 @@
+.goal {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 0;
+    max-width: 100%;
+
+    @media screen and (min-width: 500px) {
+        flex-direction: row;
+    }
+
+    & > div {
+        display: inline-block;
+    }
+
+    .left-container {
+        @media screen and (min-width: 500px) {
+            width: 75%;
+        }
+
+        .icon-container {
+            display: inline-block;
+            width: 50px;
+
+            & > * {
+                margin-right: 5px;
+            }
+        }
+
+        .goal-label, .goal-label * {
+            display: inline;
+        }
+    }
+    .area-tag {
+        display: flex;
+        justify-content: flex-start;
+        margin-inline-start: 10px;
+
+        @media screen and (min-width: 500px) {
+            width: 25%;
+            justify-content: flex-end;
+        }
+
+        .tag {
+            max-width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            
+            p {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis
+            }
+        }
+    }
+}
+
+.note {
+    background-color: lightyellow;
+    padding: 5px;
+    margin-block: 10px;
+    font-size: smaller;
+}
+
+.time-section {
+    .header {
+        display: flex;
+        align-items: center;
+
+        .time-section-title {
+            font-size: larger;
+            font-weight: 550;
+        }
+        
+        .button {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            display: flex;
+        }
+    }
+}
+
+.starred {
+    color: #FFD700;
+}
+
+.unstarred {
+    color: lightslategray;
+}

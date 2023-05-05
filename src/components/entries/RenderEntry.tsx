@@ -1,9 +1,10 @@
 import { useContext } from 'react';
 import _ from 'lodash';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import { DataContext, SettingsContext } from '../../App';
 import { backend } from '../../utilities/backend';
-import { monthNames } from '../../utilities/dates';
 import { Entry, Data, Settings } from '../../utilities/interfaces';
 
 interface RenderEntryProps {
@@ -22,55 +23,30 @@ export const RenderEntry = ({ entry, setEntryIdToEdit }: RenderEntryProps ) => {
     const renderAreaLabel = (areaId: string) => {
         const foundArea = areas.find(area => area._id === areaId);
         return foundArea && (
-            <span key={areaId} className='tag mr-2'>
-                {foundArea.label}
+            <span key={areaId} className='tag'>
+                <p>{foundArea.label}</p>
             </span>)
     }
 
-    const renderDate = () => {
-        let [date, month, quarter, year] = ['', '', '', '']
-        if (entry.startDate) {
-            const startDate = new Date(entry.startDate);
-            date = startDate.getDate().toString();
-            month = monthNames[startDate.getMonth()];
-            quarter = Math.floor(startDate.getMonth() / 3 + 1).toString();
-            year = startDate.getFullYear().toString();
-        }
-        switch (entry.timescale) {
-            case 'day':
-                return `${date} ${month}`;
-            case 'week':
-                return `Week of ${date} ${month}`;
-            case 'month':
-                return month;
-            case 'quarter':
-                return 'Q' + quarter;
-            case 'year':
-                return year;
-            case 'decade':
-                return year + 's';
-            case 'life':
-                return 'Life';
-        }
-    }
-
-    return (
-        <div className='entry'>
+    return entry.type === 'goal' ? (
+        <div className='goal'>
             <div className='hoverable left-container'>
-                <div className='icon-container'>
-                    {entry.type === 'note' && <span className={'tag is-light is-warning'}>Note</span>}
-                    {entry.type === 'goal' && <input type='checkbox' checked={entry.complete} onChange={toggleComplete}/>}
+                {entry.type === 'goal' && <div className='icon-container'>
+                    <input type='checkbox' checked={entry.complete} onChange={toggleComplete}/>
                     {entry.starred && <span className='icon'><i className={'fas fa-star starred'}/></span>}
-                    
-                </div>
-                <span className='entry-label' onClick={() => setEntryIdToEdit(entry._id)}>{entry.primaryText}</span>
+                </div>}
+                <div className={'goal-label'} onClick={() => setEntryIdToEdit(entry._id)}><ReactMarkdown children={entry.primaryText ? entry.primaryText : ''} /></div>
             </div>
-            <div className='hoverable right-container'>
-                <div className='is-inline'>
-                    {entry.areaId && renderAreaLabel(entry.areaId)}
-                </div>
-                {(entry.timescale || entry.someday) && <span className='tag mr-2 is-warning'>{entry.timescale ? renderDate() : 'someday'}</span>}
+            <div className='area-tag'>
+                {entry.areaId && renderAreaLabel(entry.areaId)}
             </div>
         </div>
     )
+    : (
+    <div className='note hoverable' onClick={() => setEntryIdToEdit(entry._id)}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} children={entry.primaryText ? entry.primaryText : ''} />
+        <div className='area-tag mt-2'>
+            {entry.areaId && renderAreaLabel(entry.areaId)}
+        </div>
+    </div>)
 }
