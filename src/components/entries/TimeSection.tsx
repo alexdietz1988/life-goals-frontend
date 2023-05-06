@@ -3,7 +3,7 @@ import { Fragment, useState, useEffect, useContext } from 'react';
 import { UserContext, DataContext } from '../../App';
 import { backend } from '../../utilities/backend';
 import { Entry, Data, UserContextInterface, Timescale } from '../../utilities/interfaces';
-import { dayNames, monthNames } from '../../utilities/dates';
+import { dayNames, monthNames, getDateLabel } from '../../utilities/dates';
 import { EntryForm } from './EntryForm';
 import { RenderEntry } from './RenderEntry';
 
@@ -73,63 +73,7 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
     }
     const { starredGoals, unstarredGoals, notes } = filterEntries();
 
-    const label = () => {
-        const date = startDate ? startDate.getDate() : 0;
-        const month = startDate ? startDate.getMonth() : 0;
-        const year = startDate ? startDate.getFullYear() : 0;
-
-        const renderDate = date.toString();
-        const renderMonth = monthNames[month];
-        const renderYear = year.toString();
-
-        if (timescale === 'life') return 'Life';
-        if (someday) return 'Someday';
-        if (!timescale) return 'Anytime';
-        
-        // Today's date
-        const d = new Date();
-        const w = new Date();
-        // Set w to the start of the current week
-        w.setDate(w.getDate() - w.getDay());
-        const getQuarter = (month: number) => Math.floor((month + 3) / 3);
-
-        switch (timescale) {
-            case 'day':
-                if (date === d.getDate() && month === d.getMonth() && year === d.getFullYear()) return 'Today';
-                if (date === d.getDate() - 1 && month === d.getMonth() && year === d.getFullYear()) return 'Yesterday';
-                if (date === d.getDate() + 1 && month === d.getMonth() && year === d.getFullYear()) return 'Tomorrow';
-                const day = startDate ? dayNames[new Date(startDate.getFullYear() || 0, startDate.getMonth() || 0, date).getDay()] : '';
-                return `${day} ${renderDate} ${renderMonth}`;
-            case 'week':
-                if (date === w.getDate() && month === w.getMonth() && year === w.getFullYear()) return 'This Week';
-                if (date === w.getDate() + 7 && month === w.getMonth() && year === w.getFullYear()) return 'Next Week';
-                if (date === w.getDate() - 7 && month === w.getMonth() && year === w.getFullYear()) return 'Last Week';
-                return `Week of ${renderDate} ${renderMonth}`;
-            case 'month':
-                if (month === d.getMonth() && year === d.getFullYear()) return 'This Month';
-                if (month === d.getMonth() - 1 && year === d.getFullYear()) return 'Last Month';
-                if (month === d.getMonth() + 1 && year === d.getFullYear()) return 'Next Month';
-                return `${renderMonth} ${renderYear}`;
-            case 'quarter':
-                if (getQuarter(month) === getQuarter(d.getMonth()) && year === d.getFullYear()) return 'This Quarter';
-                if (getQuarter(month) === getQuarter(d.getMonth()) - 1 && year === d.getFullYear()) return 'Last Quarter';
-                if (getQuarter(month) === getQuarter(d.getMonth()) + 1 && year === d.getFullYear()) return 'Next Quarter';
-                return `Q${month - month % 3 - 1} ${renderYear}`;
-            case 'year':
-                if (year === d.getFullYear()) return 'This Year';
-                if (year === d.getFullYear() - 1) return 'Last Year';
-                if (year === d.getFullYear() + 1) return 'Next Year';
-                return renderYear;
-            case 'decade':
-                if (year === Math.floor(d.getFullYear()/10) * 10) return 'This Decade';
-                if (year === Math.floor(d.getFullYear()/10) * 10 - 10) return 'Last Decade';
-                if (year === Math.floor(d.getFullYear()/10) * 10 + 10) return 'Next Decade';
-                return `${renderYear}s`;
-            case 'life':
-                return 'Life';
-        }
-        return `${timescale} - ${renderDate} ${renderMonth} ${renderYear}`;
-      }
+    
     
     const renderEntryOrForm = (entry: Entry, key: number) => (
         <Fragment key={key}>
@@ -163,7 +107,7 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
         <div className='block header'>
             <h2 className={'time-section-title is-inline is-5 mr-3 ' + (isCurrentFocus === false && 'hoverable has-text-link')} onClick={() => {
                 if (jumpToTimescale && isCurrentFocus === false) jumpToTimescale(timescale)}
-                }>{label()}</h2>
+                }>{getDateLabel(startDate, timescale, someday)}</h2>
             <div className='button mr-2' onClick={() => handleToggleEntryForm('goal')}>
                 +
             </div>

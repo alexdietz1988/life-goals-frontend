@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import _ from 'lodash';
 
 import { Area, Timescale } from '../../utilities/interfaces';
-import { timescales } from '../../utilities/dates';
+import { timescales, getDateLabel } from '../../utilities/dates';
 
 interface EntryFormUIProps {
     formData: FormData,
@@ -38,8 +37,6 @@ export const EntryFormUI = ({
     getDate,
 }: EntryFormUIProps ) => {
     const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
-    const [relativeTime, setRelativeTime] = useState<'Now' | 'Later'>('Now');
-    const location = useLocation();
 
     const getStartDateLabel = (t?: Timescale, relativeTime?: string): string => {
         if (!t) return 'Someday';
@@ -49,7 +46,6 @@ export const EntryFormUI = ({
     }
 
     const handleSelectStartDate = (t: Timescale, relativeTime: 'Now' | 'Later'): void => {
-        setRelativeTime(relativeTime);
         setFormData((formData: FormData) => { 
         return {...formData, 
             timescale: t, 
@@ -134,7 +130,7 @@ export const EntryFormUI = ({
                 <div className='tag is-medium is-warning hoverable'
                     onClick={() => setFormData((formData: FormData) => {
                         return {...formData, timescale: undefined, startDate: undefined, someday: false}})}>
-                    {getStartDateLabel(formData.timescale, relativeTime)}
+                    {getDateLabel(formData.startDate, formData.timescale, formData.someday)}
                     <span className='icon'><i className="delete is-small"/></span>
                 </div>}
             </div>
