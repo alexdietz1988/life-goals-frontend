@@ -1,8 +1,8 @@
 import { useState, useContext, useRef } from 'react';
 
-import { UserContext } from '../App';
+import { UserContext, SettingsContext } from '../App';
 import { backend } from '../utilities/backend';
-import { UserContextInterface } from '../utilities/interfaces';
+import { UserContextInterface, Settings } from '../utilities/interfaces';
 
 export const SignIn = () => {
   const { setUserId } = useContext(UserContext) as UserContextInterface;

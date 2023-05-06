@@ -13,10 +13,10 @@ interface RenderEntryProps {
 
 export const RenderEntry = ({ entry, setEntryIdToEdit }: RenderEntryProps ) => {
     const { areas } = useContext(DataContext) as Data;
-    const { setLoading } = useContext(SettingsContext) as Settings;
+    const { fetchEntries } = useContext(SettingsContext) as Settings;
     const toggleComplete = async () => {
         await backend.patch('entry', { entryId: entry._id, complete: !entry.complete })
-        setLoading(true);
+        fetchEntries();
     }
 
     const renderAreaLabel = (areaId: string) => {

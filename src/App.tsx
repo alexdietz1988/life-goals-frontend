@@ -23,7 +23,6 @@ export const SettingsContext = createContext({});
 
 function App() {
   const [userId, setUserId] = useState('');
-  const [loading, setLoading] = useState(false);
   const [defaultTimes, setDefaultTimes] = useState(false);
   const navigate = useNavigate();
 
@@ -34,18 +33,21 @@ function App() {
     const idsOfchildrenOfSelectedArea = areas.filter(area => area.parent === selectedAreaId).map(area => area._id);
     const isInChildOfSelectedArea = entry.areaId && idsOfchildrenOfSelectedArea.includes(entry.areaId);
     return !selectedAreaId || (entry.areaId && entry.areaId.includes(selectedAreaId) || isInChildOfSelectedArea)});
-
-  const getData = async () => {
+  
+  const fetchEntries = async () => {
     const entriesResponse = await backend.get('entry', { params: { userId } });
     setEntries(entriesResponse.data);
+  }
+
+  const fetchAreas = async () => {
     const areasResponse = await backend.get('area', { params: { userId } });
     setAreas(areasResponse.data);
-    setLoading(false);
   }
 
   useEffect(() => {
-    getData();
-  }, [userId, loading])
+    fetchAreas();
+    fetchEntries();
+  }, [userId])
 
   const PageWrapper = ({ children }: { children: any }) => {
     return (
@@ -62,25 +64,19 @@ function App() {
     <>
     <UserContext.Provider value={{ userId, setUserId }}>
     <DataContext.Provider value={{ areas, selectedAreaId, entries: entriesInSelectedArea }}>
-    <SettingsContext.Provider value={{ setLoading, setDefaultTimes }}>
+    <SettingsContext.Provider value={{ fetchEntries, fetchAreas, setDefaultTimes }}>
     <Header />
     <main>
       {!userId && <SignIn />}
       {userId && (
       <>
       <Routes>
-        <Route path='/all-time' element={<PageWrapper children={<AllTime/>} />} />
         <Route path='/' element={<PageWrapper children={
           <FocusView defaultTimes={defaultTimes} setDefaultTimes={setDefaultTimes} />} />} />
+        <Route path='/all-time' element={<PageWrapper children={<AllTime/>} />} />
         <Route path='/manage-areas' element={<ManageAreas />} />
-        <Route path='/new-goal' element={<EntryForm selectedType='goal' dismissForm={() => {
-          setLoading(true);
-          navigate(-1);
-          }} />} />
-        <Route path='/new-note' element={<EntryForm selectedType='note' dismissForm={() => {
-          setLoading(true);
-          navigate(-1);
-          }}/>} />
+        <Route path='/new-goal' element={<EntryForm selectedType='goal' dismissForm={() => { fetchEntries(); navigate(-1); }} />} />
+        <Route path='/new-note' element={<EntryForm selectedType='note' dismissForm={() => { fetchEntries(); navigate(-1); }}/>} />
       </Routes>
     </>)
       }

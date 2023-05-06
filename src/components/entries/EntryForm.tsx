@@ -1,5 +1,4 @@
 import { useState, useContext, useRef, FormEvent } from 'react';
-import { useNavigate, useLocation } from 'react-router';
 
 import { UserContext, DataContext } from '../../App';
 import { Area, Entry, Data, Timescale, UserContextInterface } from '../../utilities/interfaces';
@@ -37,8 +36,6 @@ export const EntryForm = ({
     startDate, 
     someday = false
 }: EntryFormProps) => {
-    const navigate = useNavigate();
-    const location = useLocation();
     const { areas, selectedAreaId } = useContext(DataContext) as Data;
     const { userId } = useContext(UserContext) as UserContextInterface;
     const primaryTextRef = useRef(null as any);
@@ -137,7 +134,7 @@ export const EntryForm = ({
     const handleFormAction = (action: 'submit' | 'cancel' | 'delete', e?: FormEvent) => {
         if (action === 'submit' && e) postEntry(e);
         else if (action === 'delete') deleteEntry();
-        else if (action === 'cancel') dismissForm();
+        else if (action === 'cancel') dismissForm('cancel');
     }
 
     return (

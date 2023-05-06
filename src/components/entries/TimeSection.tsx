@@ -1,7 +1,8 @@
-import { Fragment, useState, useContext } from 'react';
+import { Fragment, useState, useEffect, useContext } from 'react';
 
-import { DataContext, SettingsContext } from '../../App';
-import { Entry, Data, Settings, Timescale } from '../../utilities/interfaces';
+import { UserContext, DataContext } from '../../App';
+import { backend } from '../../utilities/backend';
+import { Entry, Data, UserContextInterface, Timescale } from '../../utilities/interfaces';
 import { dayNames, monthNames } from '../../utilities/dates';
 import { EntryForm } from './EntryForm';
 import { RenderEntry } from './RenderEntry';
@@ -15,11 +16,19 @@ interface TimeSectionProps {
 }
 
 export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jumpToTimescale }: TimeSectionProps) => {
-    const [ entryIdToEdit, setEntryIdToEdit ] = useState('');
+    const [entryIdToEdit, setEntryIdToEdit] = useState('');
     const [showEntryForm, setShowEntryForm] = useState(false);
     const [entryFormType, setEntryFormType] = useState< 'goal' | 'note' | undefined>(undefined);
-    const { entries } = useContext(DataContext) as Data;
-    const { setLoading } = useContext(SettingsContext) as Settings;
+    const { areas, selectedAreaId } = useContext(DataContext) as Data;
+    const { userId } = useContext(UserContext) as UserContextInterface;
+    const [entries, setEntries] = useState([] as Array<Entry>);
+
+    const fetchEntries = async () => {
+        const entriesResponse = await backend.get('entry', { params: { userId } });
+        setEntries(entriesResponse.data);
+    }
+
+    useEffect(() => {fetchEntries();}, [userId])
 
     const dateMatch = (entry: Entry) => {
         let sameDate = false;
@@ -33,17 +42,36 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
         return sameDate || noDate;
     }
 
-    const entriesInTimePeriod = entries.filter(entry => {
-        const noTimescale = !timescale && !Boolean(entry.timescale);
-        const sameTimescale = timescale === entry.timescale;
-        const timescaleMatch = (!someday && !entry.someday) && (sameTimescale || noTimescale);
-        const somedayMatch = someday && entry.someday;
-        return timescaleMatch && dateMatch(entry) || somedayMatch;
-    })
-
-    const starredGoals = entriesInTimePeriod.filter(entry => entry.type === 'goal' && entry.starred);
-    const unstarredGoals = entriesInTimePeriod.filter(entry => entry.type === 'goal' && !entry.starred);
-    const notes = entriesInTimePeriod.filter(entry => entry.type === 'note');
+    const filterEntries = (): 
+        { starredGoals: Entry[], unstarredGoals: Entry[], notes: Entry[] } => {
+        const inSelectedArea = (entry: Entry): boolean => {
+            const idsOfchildrenOfSelectedArea = areas.filter(area => 
+                area.parent === selectedAreaId).map(area => area._id);
+            const isInChildOfSelectedArea = entry.areaId && 
+                idsOfchildrenOfSelectedArea.includes(entry.areaId);
+            return !!(!selectedAreaId || 
+                (entry.areaId && entry.areaId.includes(selectedAreaId) || isInChildOfSelectedArea))
+        };
+    
+        const inTimePeriod = (entry: Entry): boolean => {
+            const noTimescale = !timescale && !Boolean(entry.timescale);
+            const sameTimescale = timescale === entry.timescale;
+            const timescaleMatch = (!someday && !entry.someday) && (sameTimescale || noTimescale);
+            const somedayMatch = someday && entry.someday;
+            return !!(timescaleMatch && dateMatch(entry) || somedayMatch);
+        }
+        const entriesInTimePeriod = entries.filter(entry => 
+            inSelectedArea(entry) && inTimePeriod(entry))
+        const starredGoals = entriesInTimePeriod.filter(entry => 
+            entry.type === 'goal' && entry.starred);
+        const unstarredGoals = entriesInTimePeriod.filter(entry => 
+            entry.type === 'goal' && !entry.starred);
+        const notes = entriesInTimePeriod.filter(entry => entry.type === 'note');
+        return {
+            starredGoals, unstarredGoals, notes
+        }
+    }
+    const { starredGoals, unstarredGoals, notes } = filterEntries();
 
     const label = () => {
         const date = startDate ? startDate.getDate() : 0;
@@ -108,9 +136,9 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
         {entryIdToEdit === entry._id
         ? <EntryForm
             entry={entry}
-            dismissForm={() => {
+            dismissForm={(cancel?: string) => {
                 setEntryIdToEdit('');
-                setLoading(true);
+                if (!cancel) fetchEntries();
             }}/>
         : <RenderEntry 
             entry={entry}
@@ -151,7 +179,7 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
             someday={someday} 
             dismissForm={() => {
                 setShowEntryForm(false);
-                setLoading(true);
+                fetchEntries();
             }}
         />}
 

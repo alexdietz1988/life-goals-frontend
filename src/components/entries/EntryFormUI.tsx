@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import _ from 'lodash';
 
 import { Area, Timescale } from '../../utilities/interfaces';
@@ -153,9 +153,7 @@ export const EntryFormUI = ({
 
             <div className='buttons'>
                 <button type='submit' className='button is-link'>{editMode ? 'Update' : 'Add'}</button>
-                {location.pathname === '/new-goal' || location.pathname === '/new-note'
-                ? <Link className='button' to='/'>Cancel</Link>
-                : <div className='button' onClick={() => handleFormAction('cancel')}>Cancel</div>}
+                <div className='button' onClick={() => handleFormAction('cancel')}>Cancel</div>
                 {editMode && <div className='button is-danger is-light' onClick={() => setShowConfirmDelete(true)}>Delete</div>}
 
                 {showConfirmDelete &&

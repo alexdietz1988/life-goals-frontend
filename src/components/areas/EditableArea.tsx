@@ -10,10 +10,10 @@ interface EditableAreaProps {
 }
 
 export const EditableArea = ({ area, setAreaIdToEdit }: EditableAreaProps ) => {
-    const { setLoading } = useContext(SettingsContext) as Settings;
+    const { fetchAreas } = useContext(SettingsContext) as Settings;
     const deleteArea = async (itemId: string) => {
         await backend.delete('area', { data: { itemId } });
-        setLoading(true);
+        fetchAreas();
       }
     return (
         <div className='editable-area'>
