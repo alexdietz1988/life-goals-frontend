@@ -1,8 +1,8 @@
 import { useState, useContext, useRef, FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 
-import { UserContext, DataContext, SettingsContext } from '../../App';
-import { Area, Entry, Data, Settings, Timescale, UserContextInterface } from '../../utilities/interfaces';
+import { UserContext, DataContext } from '../../App';
+import { Area, Entry, Data, Timescale, UserContextInterface } from '../../utilities/interfaces';
 import { backend } from '../../utilities/backend';
 
 import { EntryFormUI } from './EntryFormUI';
@@ -10,8 +10,7 @@ import { EntryFormUI } from './EntryFormUI';
 interface EntryFormProps {
     selectedType?: 'goal' | 'note',
     entry?: Entry
-    setEntryIdToEdit?: Function,
-    setShowEntryForm?: Function,
+    dismissForm: Function,
     
     timescale?: Timescale,
     startDate?: Date,
@@ -32,9 +31,8 @@ interface FormData {
 
 export const EntryForm = ({ 
     selectedType, 
-    entry, 
-    setEntryIdToEdit, 
-    setShowEntryForm, 
+    entry,  
+    dismissForm, 
     timescale, 
     startDate, 
     someday = false
@@ -42,7 +40,6 @@ export const EntryForm = ({
     const navigate = useNavigate();
     const location = useLocation();
     const { areas, selectedAreaId } = useContext(DataContext) as Data;
-    const { setLoading } = useContext(SettingsContext) as Settings;
     const { userId } = useContext(UserContext) as UserContextInterface;
     const primaryTextRef = useRef(null as any);
 
@@ -125,8 +122,7 @@ export const EntryForm = ({
     const deleteEntry = async () => {
         if (entry) {
             await backend.delete('entry', { data: { entryId: entry._id } });
-            if (setEntryIdToEdit) setEntryIdToEdit('');
-            setLoading(true);
+            dismissForm();
         }
     }
 
@@ -135,15 +131,13 @@ export const EntryForm = ({
         const primaryText = primaryTextRef.current.value;
         if (entry) await backend.put('entry', {entryId: entry._id, userId, type, ...formData, primaryText});
         else await backend.post('entry', {userId, type, ...formData, primaryText});
-        setLoading(true);
-        if (setEntryIdToEdit) setEntryIdToEdit('');
-        if (location.pathname === '/new-goal' || location.pathname === '/new-note') navigate('/');
+        dismissForm();
     }
 
     const handleFormAction = (action: 'submit' | 'cancel' | 'delete', e?: FormEvent) => {
         if (action === 'submit' && e) postEntry(e);
         else if (action === 'delete') deleteEntry();
-        else if (action === 'cancel' && setShowEntryForm) setShowEntryForm(false);
+        else if (action === 'cancel') dismissForm();
     }
 
     return (

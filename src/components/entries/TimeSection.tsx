@@ -1,7 +1,7 @@
 import { Fragment, useState, useContext } from 'react';
 
-import { DataContext } from '../../App';
-import { Entry, Data, Timescale } from '../../utilities/interfaces';
+import { DataContext, SettingsContext } from '../../App';
+import { Entry, Data, Settings, Timescale } from '../../utilities/interfaces';
 import { dayNames, monthNames } from '../../utilities/dates';
 import { EntryForm } from './EntryForm';
 import { RenderEntry } from './RenderEntry';
@@ -19,6 +19,7 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
     const [showEntryForm, setShowEntryForm] = useState(false);
     const [entryFormType, setEntryFormType] = useState< 'goal' | 'note' | undefined>(undefined);
     const { entries } = useContext(DataContext) as Data;
+    const { setLoading } = useContext(SettingsContext) as Settings;
 
     const dateMatch = (entry: Entry) => {
         let sameDate = false;
@@ -107,7 +108,10 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
         {entryIdToEdit === entry._id
         ? <EntryForm
             entry={entry}
-            setEntryIdToEdit={setEntryIdToEdit}/>
+            dismissForm={() => {
+                setEntryIdToEdit('');
+                setLoading(true);
+            }}/>
         : <RenderEntry 
             entry={entry}
             setEntryIdToEdit={setEntryIdToEdit}/>}
@@ -121,7 +125,6 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
             setShowEntryForm(false);
             setEntryFormType(undefined);
         } else {
-            console.log('a')
             setEntryFormType(type);
         }
     }
@@ -146,7 +149,10 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
             startDate={startDate} 
             timescale={timescale as Timescale} 
             someday={someday} 
-            setShowEntryForm={setShowEntryForm}
+            dismissForm={() => {
+                setShowEntryForm(false);
+                setLoading(true);
+            }}
         />}
 
         {starredGoals.map((entry: Entry, i: number) => renderEntryOrForm(entry, i))}

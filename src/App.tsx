@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import { useState, useEffect, createContext } from 'react';
 
 import './styles/App.scss';
@@ -25,6 +25,7 @@ function App() {
   const [userId, setUserId] = useState('');
   const [loading, setLoading] = useState(false);
   const [defaultTimes, setDefaultTimes] = useState(false);
+  const navigate = useNavigate();
 
   const [entries, setEntries] = useState([] as Array<Entry>);
   const [areas, setAreas] = useState([] as Array<Area>);
@@ -72,8 +73,14 @@ function App() {
         <Route path='/' element={<PageWrapper children={
           <FocusView defaultTimes={defaultTimes} setDefaultTimes={setDefaultTimes} />} />} />
         <Route path='/manage-areas' element={<ManageAreas />} />
-        <Route path='/new-goal' element={<EntryForm selectedType='goal' />} />
-        <Route path='/new-note' element={<EntryForm selectedType='note' />} />
+        <Route path='/new-goal' element={<EntryForm selectedType='goal' dismissForm={() => {
+          setLoading(true);
+          navigate(-1);
+          }} />} />
+        <Route path='/new-note' element={<EntryForm selectedType='note' dismissForm={() => {
+          setLoading(true);
+          navigate(-1);
+          }}/>} />
       </Routes>
     </>)
       }
