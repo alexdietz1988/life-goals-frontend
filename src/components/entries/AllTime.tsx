@@ -59,11 +59,18 @@ export const AllTime = () => {
     return (
         <>
         <div className='block'>
-            <div className={'button ' + (!showPast && 'is-primary')} 
+            <div className={'button mr-2 ' + (!showPast && 'is-primary')} 
                 onClick={() => setShowPast(showPast => !showPast)}>
                 Hide Past
                 {!showPast && <span className='icon ml-1'><i className="delete is-small"/></span>}
             </div>
+
+            <div className='select'>
+                <select onChange={(e) => console.log(e.target.value)}>
+                    {timescales.map((t, i) => <option key={i} className='button'>{t}</option>)}
+                </select>
+            </div>
+            
         </div>
 
         {entries.filter(e => !e.timescale).length > 0 && <TimeSection />}
