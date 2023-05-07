@@ -3,7 +3,7 @@ import { Fragment, useState, useEffect, useContext } from 'react';
 import { UserContext, DataContext } from '../../App';
 import { backend } from '../../utilities/backend';
 import { Entry, Data, UserContextInterface, Timescale } from '../../utilities/interfaces';
-import { dayNames, monthNames, getDateLabel } from '../../utilities/dates';
+import { getDateLabel } from '../../utilities/dates';
 import { EntryForm } from './EntryForm';
 import { RenderEntry } from './RenderEntry';
 

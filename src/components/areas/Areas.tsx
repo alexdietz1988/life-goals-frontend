@@ -10,7 +10,14 @@ export const Areas = ({ selectedAreaId, setSelectedAreaId }: { selectedAreaId: s
 
     const hasParent = (area: Area) => area.parent && area.parent !== '';
     const parentAreas = areas.filter((area: Area) => !hasParent(area));
-    const childrenToDisplay = areas.filter((area: Area) => hasParent(area) && (area.parent === selectedAreaId || area._id === selectedAreaId));
+
+    const siblingIsSelected = (area: Area) => {
+        const siblingIds = areas.filter(a => a.parent === area.parent).map(a => a._id);
+        return (siblingIds.some(id => selectedAreaId === id));
+    }
+
+    const childrenToDisplay = areas.filter(area => hasParent(area) && 
+        (area.parent === selectedAreaId || area._id === selectedAreaId || siblingIsSelected(area)));
 
     return (
         <div className='container'>
@@ -36,9 +43,6 @@ export const Areas = ({ selectedAreaId, setSelectedAreaId }: { selectedAreaId: s
                 </div>}
             </div>
             {selectedAreaId && <AreaInfo selectedAreaId={selectedAreaId} />}
-
-            
-
         </div>
     )
 }
