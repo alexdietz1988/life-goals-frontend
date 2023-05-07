@@ -73,8 +73,6 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
     }
     const { starredGoals, unstarredGoals, notes } = filterEntries();
 
-    
-    
     const renderEntryOrForm = (entry: Entry, key: number) => (
         <Fragment key={key}>
         {entryIdToEdit === entry._id

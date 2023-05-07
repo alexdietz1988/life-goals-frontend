@@ -86,36 +86,6 @@ export const EntryForm = ({
         return { parentAreas, childrenToDisplay };
     }
 
-    const getDate = (t: Timescale, relativeTime: 'Now' | 'Later'): Date | undefined => {
-        const d = new Date();
-        const isNow = relativeTime === 'Now';
-        if (t === 'day' && !isNow) {
-            d.setDate(d.getDate() + 1);
-        } else if (t === 'week') {
-            const weekStart = d.getDate() - d.getDay();
-            d.setDate(isNow ? weekStart : weekStart + 7);
-        } else if (t === 'month') {
-            d.setDate(1);
-            if (!isNow) d.setMonth(d.getMonth() + 1);
-        } else if (t === 'quarter') {
-            d.setDate(1);
-            const quarterStart = d.getMonth() - d.getMonth() % 3;
-            d.setMonth(isNow ? quarterStart : quarterStart + 3);
-        } else if (t === 'year') {
-            d.setMonth(0);
-            d.setDate(1);
-            if (isNow) d.setFullYear(d.getFullYear() + 1);
-        } else if (t === 'decade') {
-            d.setMonth(0);
-            d.setDate(1);
-            const decadeStart = d.getFullYear() - d.getFullYear() % 10;
-            d.setFullYear(isNow ? decadeStart : decadeStart + 10)
-        } else if (t === 'life') {
-            return undefined;
-        }
-        return d;
-    }
-
     const deleteEntry = async () => {
         if (entry) {
             await backend.delete('entry', { data: { entryId: entry._id } });
@@ -145,7 +115,6 @@ export const EntryForm = ({
             editMode={!!entry}
             primaryTextRef={primaryTextRef}
             getAreas={getAreas()}
-            getDate={getDate}
             handleFormAction={handleFormAction}
             />
     )

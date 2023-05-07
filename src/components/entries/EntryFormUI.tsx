@@ -2,18 +2,16 @@ import { useState } from 'react';
 import _ from 'lodash';
 
 import { Area, Timescale } from '../../utilities/interfaces';
-import { timescales, getDateLabel } from '../../utilities/dates';
+import { timescales, getDate, getDateLabel } from '../../utilities/dates';
 
 interface EntryFormUIProps {
     formData: FormData,
     setFormData: Function,
-
     type: 'goal' | 'note',
     editMode?: boolean,
     primaryTextRef: any,
     handleFormAction: Function,
     getAreas: { parentAreas: Area[], childrenToDisplay: Area[] },
-    getDate: Function,
 }
 
 interface FormData {
@@ -34,7 +32,6 @@ export const EntryFormUI = ({
     primaryTextRef,
     handleFormAction,
     getAreas,
-    getDate,
 }: EntryFormUIProps ) => {
     const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
 

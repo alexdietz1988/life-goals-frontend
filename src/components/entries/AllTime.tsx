@@ -1,13 +1,14 @@
-import { Fragment, useContext } from 'react';
+import { Fragment, useState, useContext } from 'react';
 import _ from 'lodash';
 
 import { DataContext } from '../../App';
-import { Data } from '../../utilities/interfaces';
-import { timescales } from '../../utilities/dates';
+import { Data, Timescale } from '../../utilities/interfaces';
+import { timescales, getDate } from '../../utilities/dates';
 import { TimeSection } from './TimeSection';
 
 export const AllTime = () => {
     const { entries } = useContext(DataContext) as Data;
+    const [showPast, setShowPast] = useState(false);
 
     const startDatesToDisplay = {
         day: [] as Date[],
@@ -17,6 +18,15 @@ export const AllTime = () => {
         year: [] as Date[],
         decade: [] as Date[],
         life: [] as Date[],
+    }
+
+    const isPast = (date: Date, timescale: Timescale) => {
+        const startOfTimescale = getDate(timescale, 'Now');
+        if (startOfTimescale === undefined) return false;
+        if (date.getFullYear() < startOfTimescale.getFullYear()) return true;
+        if (date.getMonth() < startOfTimescale.getMonth()) return true;
+        if (date.getDate() < startOfTimescale.getDate()) return true;
+        return false;
     }
 
     for (let timescale of timescales) {
@@ -29,7 +39,7 @@ export const AllTime = () => {
                 const date = parseInt(entry.startDate.slice(8,10));
                 const d = new Date(year, month, date);
                 const isDuplicate = datesForTimescale.some(date => date.getTime() === d.getTime());
-                if (!isDuplicate) datesForTimescale.push(d);
+                if (!isDuplicate && (showPast || !isPast(d, timescale as Timescale))) datesForTimescale.push(d);
                 }}
         )
         startDatesToDisplay[timescale as keyof typeof startDatesToDisplay] = datesForTimescale.sort((a,b) => a.getTime() - b.getTime());
@@ -48,6 +58,14 @@ export const AllTime = () => {
 
     return (
         <>
+        <div className='block'>
+            <div className={'button ' + (!showPast && 'is-primary')} 
+                onClick={() => setShowPast(showPast => !showPast)}>
+                Hide Past
+                {!showPast && <span className='icon ml-1'><i className="delete is-small"/></span>}
+            </div>
+        </div>
+
         {entries.filter(e => !e.timescale).length > 0 && <TimeSection />}
         {entries.filter(e => e.someday).length > 0 && <TimeSection someday={true} />}
         
