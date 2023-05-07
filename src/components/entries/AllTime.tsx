@@ -32,7 +32,7 @@ export const AllTime = () => {
                 if (!isDuplicate) datesForTimescale.push(d);
                 }}
         )
-        datesForTimescale.sort();
+        startDatesToDisplay[timescale as keyof typeof startDatesToDisplay] = datesForTimescale.sort((a,b) => a.getTime() - b.getTime());
     }
     
     const displayTimescale = (timescale: string) => {
