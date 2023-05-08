@@ -6,6 +6,7 @@ import './styles/Header.scss';
 import './styles/Areas.scss';
 import './styles/Entries.scss';
 import './styles/EntryForm.scss';
+import './styles/AllTime.scss';
 import { backend } from './utilities/backend';
 import { Entry, Area } from './utilities/interfaces';
 

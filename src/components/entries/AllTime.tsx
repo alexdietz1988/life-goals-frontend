@@ -8,7 +8,8 @@ import { TimeSection } from './TimeSection';
 
 export const AllTime = () => {
     const { entries } = useContext(DataContext) as Data;
-    const [showPast, setShowPast] = useState(false);
+    const [relativeTimesToShow, setRelativeTimesToShow] = useState({ past: false, present: true, future: true });
+    const [selectedTimescale, setSelectedTimescale] = useState('');
 
     const startDatesToDisplay = {
         day: [] as Date[],
@@ -20,13 +21,18 @@ export const AllTime = () => {
         life: [] as Date[],
     }
 
-    const isPast = (date: Date, timescale: Timescale) => {
+    const getRelativeTime = (date: Date, timescale: Timescale) => {
         const startOfTimescale = getDate(timescale, 'Now');
-        if (startOfTimescale === undefined) return false;
-        if (date.getFullYear() < startOfTimescale.getFullYear()) return true;
-        if (date.getMonth() < startOfTimescale.getMonth()) return true;
-        if (date.getDate() < startOfTimescale.getDate()) return true;
-        return false;
+        if (startOfTimescale === undefined) return undefined;
+        if (date.getFullYear() === startOfTimescale.getFullYear() && 
+            date.getMonth() === startOfTimescale.getMonth() && 
+            date.getDate() === startOfTimescale.getDate()) {
+            return 'present';
+        } else if (date.getTime() > startOfTimescale.getTime()) {
+            return 'future';
+        } else if (date.getTime() < startOfTimescale.getTime()) {
+            return 'past';
+        }
     }
 
     for (let timescale of timescales) {
@@ -39,7 +45,9 @@ export const AllTime = () => {
                 const date = parseInt(entry.startDate.slice(8,10));
                 const d = new Date(year, month, date);
                 const isDuplicate = datesForTimescale.some(date => date.getTime() === d.getTime());
-                if (!isDuplicate && (showPast || !isPast(d, timescale as Timescale))) datesForTimescale.push(d);
+                const isRelativeTimeMatch = relativeTimesToShow[getRelativeTime(d, timescale as Timescale) as keyof typeof relativeTimesToShow];
+                const selectedTimescaleMatch = !selectedTimescale || selectedTimescale === timescale;
+                if (!isDuplicate && isRelativeTimeMatch && selectedTimescaleMatch) datesForTimescale.push(d);
                 }}
         )
         startDatesToDisplay[timescale as keyof typeof startDatesToDisplay] = datesForTimescale.sort((a,b) => a.getTime() - b.getTime());
@@ -58,27 +66,39 @@ export const AllTime = () => {
 
     return (
         <>
-        <div className='block'>
-            <div className={'button mr-2 ' + (!showPast && 'is-primary')} 
-                onClick={() => setShowPast(showPast => !showPast)}>
-                Hide Past
-                {!showPast && <span className='icon ml-1'><i className="delete is-small"/></span>}
+        <div className='block all-time-header'>
+            <div className='buttons has-addons'>
+                {['past', 'present', 'future'].map((relativeTime, i) => {
+                    const showRelativeTime = relativeTimesToShow[relativeTime as keyof typeof relativeTimesToShow];
+                    return (
+                <div key={i}
+                    className={'button ' + (showRelativeTime && 'is-primary')}
+                    onClick={() => setRelativeTimesToShow(prevState => {
+                        return { ...prevState,
+                        [relativeTime]: !showRelativeTime}
+                        })}>
+                    {_.capitalize(relativeTime)}
+                    {showRelativeTime && <span className='icon ml-1'><i className="delete is-small"/></span>}
+                </div>)})}
             </div>
 
             <div className='select'>
-                <select onChange={(e) => console.log(e.target.value)}>
-                    {timescales.map((t, i) => <option key={i} className='button'>{t}</option>)}
+                <select onChange={(e) => setSelectedTimescale(e.target.value)}>
+                    <option value=''>Filter...</option>
+                    <option value='anytime'>Anytime</option>
+                    {timescales.map((t, i) => <option key={i} value={t} className='button'>{t === 'life' ? 'Life' : _.capitalize(t) + 's'}</option>)}
+                    <option value='someday'>Someday</option>
                 </select>
             </div>
             
         </div>
 
-        {entries.filter(e => !e.timescale).length > 0 && <TimeSection />}
-        {entries.filter(e => e.someday).length > 0 && <TimeSection someday={true} />}
+        {(entries.filter(e => !e.timescale).length > 0 && 
+            relativeTimesToShow.present && 
+            (!selectedTimescale || selectedTimescale === 'anytime')) && 
+            <TimeSection />}
         
-        {timescales.every(t => startDatesToDisplay[t as keyof typeof startDatesToDisplay].length === 0)
-            ? <div className='block'>Nothing here yet!</div>       
-            : timescales.map((t, i) => {
+        {timescales.map((t, i) => {
                 if (startDatesToDisplay[t as keyof typeof startDatesToDisplay].length === 0) return <Fragment key={i}></Fragment>;
                 return (
                 <div key={i} className='block my-6'>
@@ -91,7 +111,9 @@ export const AllTime = () => {
                 </div>)}
         )}
 
-        {entries.filter(e => e.timescale === 'life').length > 0 && 
+        {(entries.filter(e => e.timescale === 'life').length > 0 && 
+            relativeTimesToShow.present && 
+            selectedTimescale === 'life') && 
         <div className='block my-6'>
             <div className='block'>
                 <div className='block'>
@@ -102,5 +124,9 @@ export const AllTime = () => {
             </div>
             <TimeSection timescale='life'/>
         </div>}
+
+        {(entries.filter(e => e.someday).length > 0 && relativeTimesToShow.future && 
+            (!selectedTimescale || selectedTimescale === 'someday')) && 
+            <TimeSection someday={true} />}
         </>)
 }

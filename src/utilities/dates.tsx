@@ -29,7 +29,7 @@ export const getDate = (t: string, relativeTime: 'Now' | 'Later'): Date | undefi
     } else if (t === 'year') {
         d.setMonth(0);
         d.setDate(1);
-        if (isNow) d.setFullYear(d.getFullYear() + 1);
+        if (!isNow) d.setFullYear(d.getFullYear() + 1);
     } else if (t === 'decade') {
         d.setMonth(0);
         d.setDate(1);
