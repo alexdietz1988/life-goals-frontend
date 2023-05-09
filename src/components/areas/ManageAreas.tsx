@@ -7,6 +7,7 @@ import { AreaForm } from './AreaForm';
 import { EditableArea } from './EditableArea';
 
 export const ManageAreas = () => {
+    const [ showAreaForm, setShowAreaForm ] = useState(false);
     const { areas } = useContext(DataContext) as Data;
     const [areaIdToEdit, setAreaIdToEdit] = useState('');
     const hasParent = (area: Area) => area.parent && area.parent !== '';
@@ -16,7 +17,7 @@ export const ManageAreas = () => {
     const renderArea = (area: Area) => 
         <div>
         {(areaIdToEdit === area._id
-            ? <AreaForm area={area} setAreaIdToEdit={setAreaIdToEdit}/>
+            ? <AreaForm area={area} dismissForm={() => setAreaIdToEdit('')}/>
             : <EditableArea area={area} setAreaIdToEdit={setAreaIdToEdit} />)}
         </div>;
 
@@ -38,6 +39,9 @@ export const ManageAreas = () => {
         </div>
         )}
         </div>
-        <AreaForm setAreaIdToEdit={setAreaIdToEdit}/>
+        {!showAreaForm 
+            ? <div className='button' onClick={() => setShowAreaForm(showAreaForm => !showAreaForm)}>Add new</div>
+            : <AreaForm dismissForm={() => setShowAreaForm(false)}/>
+        }
     </div>)
 }
