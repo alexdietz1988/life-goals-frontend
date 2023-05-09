@@ -1,4 +1,4 @@
-import { useState, useContext, useRef } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
 
 import { UserContext } from '../App';
 import { backend } from '../utilities/backend';
@@ -10,6 +10,10 @@ export const SignIn = () => {
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const [warning, setWarning] = useState('')
 
+  useEffect(() => {
+    localStorage.getItem('userId') && setUserId(localStorage.getItem('userId') as string);
+  }, [setUserId])
+
   const postCredentials = async (signinType: 'login' | 'signup') => {
     const response = await backend.post(`auth/${signinType}`, { 
       username: usernameInputRef.current?.value, 
@@ -20,6 +24,7 @@ export const SignIn = () => {
     }
     else if (response.status === 200) {
       setUserId(response.data);
+      localStorage.setItem('userId', response.data);
       setWarning('');
     }
   }

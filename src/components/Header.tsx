@@ -59,7 +59,8 @@ export const Header = () => {
                     </div>
                 </div>
                 <div className='logout'>
-                    <button className='button is-warning is-light' onClick={() => setUserId('')}>
+                    <button className='button is-warning is-light' 
+                        onClick={() => { setUserId(''); localStorage.clear(); }}>
                         <span className='mr-2'>Logout</span>
                         <span className='fas fa-right-from-bracket' />
                     </button>
