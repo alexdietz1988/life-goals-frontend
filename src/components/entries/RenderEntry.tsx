@@ -31,8 +31,8 @@ export const RenderEntry = ({ entry, setEntryIdToEdit }: RenderEntryProps ) => {
         <div className='goal'>
             <div className='hoverable left-container'>
                 {entry.type === 'goal' && <div className='icon-container'>
+                    <span className='icon'><i className={'fas fa-star ' + (entry.starred ? 'starred' : 'unstarred')}/></span>
                     <input type='checkbox' checked={entry.complete} onChange={toggleComplete}/>
-                    {entry.starred && <span className='icon'><i className={'fas fa-star starred'}/></span>}
                 </div>}
                 <div className={'goal-label'} onClick={() => setEntryIdToEdit(entry._id)}><ReactMarkdown children={entry.primaryText ? entry.primaryText : ''} /></div>
             </div>
