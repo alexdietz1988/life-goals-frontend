@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import { DataContext, SettingsContext } from '../../App';
 import { backend } from '../../utilities/backend';
 import { Entry, Data, Settings } from '../../utilities/interfaces';
+import { getDateLabel } from '../../utilities/dates'
 
 interface RenderEntryProps {
     entry: Entry,
@@ -16,6 +17,10 @@ export const RenderEntry = ({ entry, setEntryIdToEdit }: RenderEntryProps ) => {
     const { fetchEntries } = useContext(SettingsContext) as Settings;
     const toggleComplete = async () => {
         await backend.patch('entry', { entryId: entry._id, complete: !entry.complete })
+        fetchEntries();
+    }
+    const toggleStarred = async () => {
+        await backend.patch('entry', { entryId: entry._id, starred: !entry.starred })
         fetchEntries();
     }
 
@@ -31,7 +36,7 @@ export const RenderEntry = ({ entry, setEntryIdToEdit }: RenderEntryProps ) => {
         <div className='goal'>
             <div className='hoverable left-container'>
                 {entry.type === 'goal' && <div className='icon-container'>
-                    <span className='icon'><i className={'fas fa-star ' + (entry.starred ? 'starred' : 'unstarred')}/></span>
+                    <span className='icon' onClick={toggleStarred}><i className={'fas fa-star ' + (entry.starred ? 'starred' : 'unstarred')}/></span>
                     <input type='checkbox' checked={entry.complete} onChange={toggleComplete}/>
                 </div>}
                 <div className={'goal-label'} onClick={() => setEntryIdToEdit(entry._id)}><ReactMarkdown children={entry.primaryText ? entry.primaryText : ''} /></div>
@@ -43,8 +48,11 @@ export const RenderEntry = ({ entry, setEntryIdToEdit }: RenderEntryProps ) => {
     )
     : (
     <div className='note hoverable' onClick={() => setEntryIdToEdit(entry._id)}>
-        <ReactMarkdown remarkPlugins={[remarkGfm]} children={entry.primaryText ? entry.primaryText : ''} />
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {entry.primaryText ? entry.primaryText : ''}
+        </ReactMarkdown>
         <div className='area-tag mt-2'>
+            {entry.createdOn && <span className='tag is-info is-light mr-1'>{getDateLabel(new Date(entry.createdOn), 'day') + ' ' + new Date(entry.createdOn).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>}
             {entry.areaId && renderAreaLabel(entry.areaId)}
         </div>
     </div>)

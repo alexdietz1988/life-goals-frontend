@@ -67,7 +67,7 @@ export const AllTime = () => {
     return (
         <>
         <div className='block all-time-header'>
-            <div className='buttons has-addons'>
+            <div className='buttons'>
                 {['past', 'present', 'future'].map((relativeTime, i) => {
                     const showRelativeTime = relativeTimesToShow[relativeTime as keyof typeof relativeTimesToShow];
                     return (

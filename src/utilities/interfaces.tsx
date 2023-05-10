@@ -13,7 +13,7 @@ export interface Entry {
     someday: boolean,
     starred: boolean,
 
-    createdAt?: Date,
+    createdOn?: Date,
 }
 
 export interface Area {

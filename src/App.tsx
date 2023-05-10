@@ -34,7 +34,8 @@ function App() {
   const entriesInSelectedArea = entries.filter(entry => {
     const idsOfchildrenOfSelectedArea = areas.filter(area => area.parent === selectedAreaId).map(area => area._id);
     const isInChildOfSelectedArea = entry.areaId && idsOfchildrenOfSelectedArea.includes(entry.areaId);
-    return !selectedAreaId || (entry.areaId && entry.areaId.includes(selectedAreaId) || isInChildOfSelectedArea)});
+    return !selectedAreaId || 
+      (entry.areaId && (entry.areaId.includes(selectedAreaId) || isInChildOfSelectedArea))});
   
   const fetchEntries = async () => {
     const entriesResponse = await backend.get('entry', { params: { userId } });
@@ -47,8 +48,10 @@ function App() {
   }
 
   useEffect(() => {
-    fetchAreas();
-    fetchEntries();
+    if (userId) {
+      fetchAreas();
+      fetchEntries();
+    }
   }, [userId])
 
   const PageWrapper = ({ children }: { children: any }) => {
@@ -83,7 +86,7 @@ function App() {
     </>)
       }
     </main>
-    <footer className='footer is-small'><strong>Life Goals</strong> by <a target='_blank' href="http://alexdietz.com">Alex Dietz</a></footer>
+    <footer className='footer is-small'><strong>Life Goals</strong> by <a target='_blank' rel='noreferrer' href="http://alexdietz.com">Alex Dietz</a></footer>
     </SettingsContext.Provider>
     </DataContext.Provider>
     </UserContext.Provider>

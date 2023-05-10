@@ -25,7 +25,7 @@ interface FormData {
     areaId: string,
     startDate: Date | undefined,
     timescale: Timescale | undefined;
-    createdAt: Date,
+    createdOn: Date,
 }
 
 export const EntryForm = ({ 
@@ -68,7 +68,7 @@ export const EntryForm = ({
         areaId: entry && entry.areaId ? entry.areaId : selectedAreaId,
 
         secondaryText: '',
-        createdAt: entry && entry.createdAt ? entry.createdAt : new Date(),
+        createdOn: entry && entry.createdOn ? entry.createdOn : new Date(),
     });
 
     const getAreas = () => {
@@ -80,9 +80,9 @@ export const EntryForm = ({
         }
         const childrenToDisplay = areas.filter((area: Area) => 
             hasParent(area) && 
-            (area.parent && formData.areaId === area.parent || 
+            (area.parent && (formData.areaId === area.parent || 
             formData.areaId === area._id ||
-            siblingIsSelected(area)));
+            siblingIsSelected(area))));
         return { parentAreas, childrenToDisplay };
     }
 
