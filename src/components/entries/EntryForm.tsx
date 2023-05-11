@@ -25,7 +25,7 @@ interface FormData {
     areaId: string,
     startDate: Date | undefined,
     timescale: Timescale | undefined;
-    createdOn: Date,
+    createdAt: Date,
 }
 
 export const EntryForm = ({ 
@@ -68,7 +68,7 @@ export const EntryForm = ({
         areaId: entry && entry.areaId ? entry.areaId : selectedAreaId,
 
         secondaryText: '',
-        createdOn: entry && entry.createdOn ? entry.createdOn : new Date(),
+        createdAt: entry && entry.createdAt ? entry.createdAt : new Date(),
     });
 
     const getAreas = () => {
