@@ -1,8 +1,7 @@
 import { useState, useContext, useRef, FormEvent } from 'react';
-import { useNavigate, useLocation } from 'react-router';
 
-import { UserContext, DataContext, SettingsContext } from '../../App';
-import { Area, Entry, Data, Settings, Timescale, UserContextInterface } from '../../utilities/interfaces';
+import { UserContext, DataContext } from '../../App';
+import { Area, Entry, Data, Timescale, UserContextInterface } from '../../utilities/interfaces';
 import { backend } from '../../utilities/backend';
 
 import { EntryFormUI } from './EntryFormUI';
@@ -10,8 +9,7 @@ import { EntryFormUI } from './EntryFormUI';
 interface EntryFormProps {
     selectedType?: 'goal' | 'note',
     entry?: Entry
-    setEntryIdToEdit?: Function,
-    setShowEntryForm?: Function,
+    dismissForm: Function,
     
     timescale?: Timescale,
     startDate?: Date,
@@ -27,22 +25,18 @@ interface FormData {
     areaId: string,
     startDate: Date | undefined,
     timescale: Timescale | undefined;
-    createdAt: Date,
+    createdOn: Date,
 }
 
 export const EntryForm = ({ 
     selectedType, 
-    entry, 
-    setEntryIdToEdit, 
-    setShowEntryForm, 
+    entry,  
+    dismissForm, 
     timescale, 
     startDate, 
     someday = false
 }: EntryFormProps) => {
-    const navigate = useNavigate();
-    const location = useLocation();
     const { areas, selectedAreaId } = useContext(DataContext) as Data;
-    const { setLoading } = useContext(SettingsContext) as Settings;
     const { userId } = useContext(UserContext) as UserContextInterface;
     const primaryTextRef = useRef(null as any);
 
@@ -74,7 +68,7 @@ export const EntryForm = ({
         areaId: entry && entry.areaId ? entry.areaId : selectedAreaId,
 
         secondaryText: '',
-        createdAt: entry && entry.createdAt ? entry.createdAt : new Date(),
+        createdOn: entry && entry.createdOn ? entry.createdOn : new Date(),
     });
 
     const getAreas = () => {
@@ -86,47 +80,16 @@ export const EntryForm = ({
         }
         const childrenToDisplay = areas.filter((area: Area) => 
             hasParent(area) && 
-            (area.parent && formData.areaId === area.parent || 
+            (area.parent && (formData.areaId === area.parent || 
             formData.areaId === area._id ||
-            siblingIsSelected(area)));
+            siblingIsSelected(area))));
         return { parentAreas, childrenToDisplay };
-    }
-
-    const getDate = (t: Timescale, relativeTime: 'Now' | 'Later'): Date | undefined => {
-        const d = new Date();
-        const isNow = relativeTime === 'Now';
-        if (t === 'day' && !isNow) {
-            d.setDate(d.getDate() + 1);
-        } else if (t === 'week') {
-            const weekStart = d.getDate() - d.getDay();
-            d.setDate(isNow ? weekStart : weekStart + 7);
-        } else if (t === 'month') {
-            d.setDate(1);
-            if (!isNow) d.setMonth(d.getMonth() + 1);
-        } else if (t === 'quarter') {
-            d.setDate(1);
-            const quarterStart = d.getMonth() - d.getMonth() % 3;
-            d.setMonth(isNow ? quarterStart : quarterStart + 3);
-        } else if (t === 'year') {
-            d.setMonth(0);
-            d.setDate(1);
-            if (isNow) d.setFullYear(d.getFullYear() + 1);
-        } else if (t === 'decade') {
-            d.setMonth(0);
-            d.setDate(1);
-            const decadeStart = d.getFullYear() - d.getFullYear() % 10;
-            d.setFullYear(isNow ? decadeStart : decadeStart + 10)
-        } else if (t === 'life') {
-            return undefined;
-        }
-        return d;
     }
 
     const deleteEntry = async () => {
         if (entry) {
             await backend.delete('entry', { data: { entryId: entry._id } });
-            if (setEntryIdToEdit) setEntryIdToEdit('');
-            setLoading(true);
+            dismissForm();
         }
     }
 
@@ -135,15 +98,13 @@ export const EntryForm = ({
         const primaryText = primaryTextRef.current.value;
         if (entry) await backend.put('entry', {entryId: entry._id, userId, type, ...formData, primaryText});
         else await backend.post('entry', {userId, type, ...formData, primaryText});
-        setLoading(true);
-        if (setEntryIdToEdit) setEntryIdToEdit('');
-        if (location.pathname === '/new-goal' || location.pathname === '/new-note') navigate('/');
+        dismissForm();
     }
 
     const handleFormAction = (action: 'submit' | 'cancel' | 'delete', e?: FormEvent) => {
         if (action === 'submit' && e) postEntry(e);
         else if (action === 'delete') deleteEntry();
-        else if (action === 'cancel' && setShowEntryForm) setShowEntryForm(false);
+        else if (action === 'cancel') dismissForm('cancel');
     }
 
     return (
@@ -154,7 +115,6 @@ export const EntryForm = ({
             editMode={!!entry}
             primaryTextRef={primaryTextRef}
             getAreas={getAreas()}
-            getDate={getDate}
             handleFormAction={handleFormAction}
             />
     )

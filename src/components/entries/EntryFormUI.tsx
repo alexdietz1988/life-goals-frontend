@@ -1,20 +1,17 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import _ from 'lodash';
 
 import { Area, Timescale } from '../../utilities/interfaces';
-import { timescales } from '../../utilities/dates';
+import { timescales, getDate, getDateLabel } from '../../utilities/dates';
 
 interface EntryFormUIProps {
     formData: FormData,
     setFormData: Function,
-
     type: 'goal' | 'note',
     editMode?: boolean,
     primaryTextRef: any,
     handleFormAction: Function,
     getAreas: { parentAreas: Area[], childrenToDisplay: Area[] },
-    getDate: Function,
 }
 
 interface FormData {
@@ -35,11 +32,8 @@ export const EntryFormUI = ({
     primaryTextRef,
     handleFormAction,
     getAreas,
-    getDate,
 }: EntryFormUIProps ) => {
     const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
-    const [relativeTime, setRelativeTime] = useState<'Now' | 'Later'>('Now');
-    const location = useLocation();
 
     const getStartDateLabel = (t?: Timescale, relativeTime?: string): string => {
         if (!t) return 'Someday';
@@ -49,7 +43,6 @@ export const EntryFormUI = ({
     }
 
     const handleSelectStartDate = (t: Timescale, relativeTime: 'Now' | 'Later'): void => {
-        setRelativeTime(relativeTime);
         setFormData((formData: FormData) => { 
         return {...formData, 
             timescale: t, 
@@ -134,7 +127,7 @@ export const EntryFormUI = ({
                 <div className='tag is-medium is-warning hoverable'
                     onClick={() => setFormData((formData: FormData) => {
                         return {...formData, timescale: undefined, startDate: undefined, someday: false}})}>
-                    {getStartDateLabel(formData.timescale, relativeTime)}
+                    {getDateLabel(formData.startDate, formData.timescale, formData.someday)}
                     <span className='icon'><i className="delete is-small"/></span>
                 </div>}
             </div>
@@ -153,9 +146,7 @@ export const EntryFormUI = ({
 
             <div className='buttons'>
                 <button type='submit' className='button is-link'>{editMode ? 'Update' : 'Add'}</button>
-                {location.pathname === '/new-goal' || location.pathname === '/new-note'
-                ? <Link className='button' to='/'>Cancel</Link>
-                : <div className='button' onClick={() => handleFormAction('cancel')}>Cancel</div>}
+                <div className='button' onClick={() => handleFormAction('cancel')}>Cancel</div>
                 {editMode && <div className='button is-danger is-light' onClick={() => setShowConfirmDelete(true)}>Delete</div>}
 
                 {showConfirmDelete &&

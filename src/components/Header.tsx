@@ -47,17 +47,20 @@ export const Header = () => {
                     <div className='navbar-item'><Link to='/' className='title-desktop'>Life Goals</Link></div>
                     <div className='navbar-item'><Link to='/' onClick={() => setDefaultTimes(true)}>Now</Link></div>
                     <div className='navbar-item'><Link to='/all-time' className=''>All Time</Link></div>
-                    <div className='navbar-item'>
-                        <Link to={path === '/new-goal' ? '/' : '/new-goal'} className='button is-primary new-entry-button mr-2'>
+                    <div className='navbar-item new-entry-button'>
+                        <Link to={path === '/new-goal' ? '/' : '/new-goal'} className='button is-primary'>
                             +
                         </Link>
-                        <Link to={path === '/new-note' ? '/' : '/new-note'} className='button is-warning new-entry-button'>
+                    </div>
+                    <div className='navbar-item new-entry-button'>
+                        <Link to={path === '/new-note' ? '/' : '/new-note'} className='button is-warning'>
                             <span className='icon'><i className='fa-regular fa-note-sticky' /></span>
                         </Link>
                     </div>
                 </div>
                 <div className='logout'>
-                    <button className='button is-warning is-light' onClick={() => setUserId('')}>
+                    <button className='button is-warning is-light' 
+                        onClick={() => { setUserId(''); localStorage.clear(); }}>
                         <span className='mr-2'>Logout</span>
                         <span className='fas fa-right-from-bracket' />
                     </button>

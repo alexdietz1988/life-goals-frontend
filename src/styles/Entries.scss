@@ -13,6 +13,8 @@
     }
 
     .left-container {
+        display: flex;
+
         @media screen and (min-width: 500px) {
             width: 75%;
         }
@@ -20,20 +22,22 @@
         .icon-container {
             display: inline-block;
             width: 50px;
+            display: flex;
+            align-content: center;
 
             & > * {
                 margin-right: 5px;
             }
         }
 
-        .goal-label, .goal-label * {
+        .goal-label {
             display: inline;
+            padding-right: 10px;
         }
     }
     .area-tag {
         display: flex;
         justify-content: flex-start;
-        margin-inline-start: 10px;
 
         @media screen and (min-width: 500px) {
             width: 25%;
@@ -85,5 +89,11 @@
 }
 
 .unstarred {
-    color: lightslategray;
+    color: hsl(0, 0%, 90%);
+    opacity: 50%;
+
+    &:hover {
+        color: #FFD700;
+        opacity: 100%;
+    }
 }

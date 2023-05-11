@@ -4,11 +4,6 @@
     }
 
     .areas-tags {
-        .manage-button {
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-
         .parent-areas, .child-areas {
             display: flex;
             flex-wrap: wrap;
@@ -56,6 +51,7 @@
         flex-direction: column;
         row-gap: 20px;
         max-width: 300px;
+        margin-bottom: 20px;
     
         .area {
             .editable-area {

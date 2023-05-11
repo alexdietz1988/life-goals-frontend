@@ -39,5 +39,6 @@ export interface Settings {
     timePeriodStart: object, 
     setTimePeriodStart: Function,
     setDefaultTimes: Function,
-    setLoading: Function
+    fetchEntries: Function,
+    fetchAreas: Function,
 }
