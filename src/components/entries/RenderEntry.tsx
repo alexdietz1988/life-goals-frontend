@@ -52,7 +52,7 @@ export const RenderEntry = ({ entry, setEntryIdToEdit }: RenderEntryProps ) => {
             {entry.primaryText ? entry.primaryText : ''}
         </ReactMarkdown>
         <div className='area-tag mt-2'>
-            {entry.createdOn && <span className='tag is-info is-light mr-1'>{getDateLabel(new Date(entry.createdOn), 'day') + ' ' + new Date(entry.createdOn).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>}
+            {entry.createdAt && <span className='tag is-info is-light mr-1'>{getDateLabel(new Date(entry.createdAt), 'day') + ' ' + new Date(entry.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>}
             {entry.areaId && renderAreaLabel(entry.areaId)}
         </div>
     </div>)
