@@ -135,9 +135,7 @@ export const AllTime = () => {
                 </div>)}
         )}
 
-        {(specialEntries.life.length > 0 && 
-            relativeTimesToShow.present && 
-            selectedTimescale === 'life') && 
+        {(specialEntries.life.length > 0 && relativeTimesToShow.present && (!selectedTimescale || selectedTimescale === 'life')) && 
         <div className='block my-6'>
             <div className='block'>
                 <div className='block'>
@@ -149,8 +147,7 @@ export const AllTime = () => {
             <TimeSection timescale='life' fetchEntries={fetchEntries} entries={specialEntries.life} />
         </div>}
 
-        {(specialEntries.someday.length > 0 && relativeTimesToShow.future && 
-            (!selectedTimescale || selectedTimescale === 'someday')) && 
+        {(specialEntries.someday.length > 0 && relativeTimesToShow.future && (!selectedTimescale || selectedTimescale === 'someday')) && 
             <TimeSection someday={true} fetchEntries={fetchEntries} entries={specialEntries.someday} />}
         </>)
 }
