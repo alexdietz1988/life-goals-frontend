@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect, useRef } from 'react';
 
 import { UserContext } from '../App';
-import { backend } from '../utilities/backend';
+import { backend } from '../utilities/utils';
 import { UserContextInterface } from '../utilities/interfaces';
 
 export const SignIn = () => {

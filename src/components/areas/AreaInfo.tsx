@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 import { DataContext } from '../../App';
-import { backend } from '../../utilities/backend';
+import { backend } from '../../utilities/utils';
 import { Data } from '../../utilities/interfaces';
 
 type AreaStatus = '' | 'green' | 'yellow' | 'red';

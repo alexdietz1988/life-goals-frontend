@@ -2,7 +2,7 @@ import { useState, useContext } from 'react';
 
 import { UserContext, DataContext, SettingsContext } from '../../App';
 import { Area, Data, Settings, UserContextInterface } from '../../utilities/interfaces';
-import { backend } from '../../utilities/backend';
+import { backend } from '../../utilities/utils';
 
 interface AreaFormProps {
     dismissForm: Function,

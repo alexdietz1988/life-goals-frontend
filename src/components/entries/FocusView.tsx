@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
-import _ from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import _, { filter } from 'lodash';
 
 import { timescales } from '../../utilities/dates';
-import { Timescale } from '../../utilities/interfaces';
+import { Timescale, Entry, UserContextInterface, Data } from '../../utilities/interfaces';
 import { TimeSection } from './TimeSection';
+import { backend, filterEntries } from '../../utilities/utils';
+import { UserContext, DataContext } from '../../App';
 
 export const FocusView = ({ defaultTimes, setDefaultTimes }: { defaultTimes: boolean, setDefaultTimes: Function }) => {
   const [timescale, setTimescale] = useState('day' as Timescale);
@@ -12,6 +14,18 @@ export const FocusView = ({ defaultTimes, setDefaultTimes }: { defaultTimes: boo
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const broaderTimescale: string = timescales[timescales.indexOf(timescale) + 1];
   const narrowerTimescale: string = timescales[timescales.indexOf(timescale) - 1];
+
+  const { userId } = useContext(UserContext) as UserContextInterface;
+  const { areas, selectedAreaId } = useContext(DataContext) as Data;
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const fetchEntries = async () => {
+    const response = await backend.get('entry', { params: { userId } });
+    setEntries(response.data);
+}
+  useEffect(() => {fetchEntries();}, [userId])
+  const getEntriesForTimescale = (timescale: string, startDate?: Date) => (
+    filterEntries(areas, entries, selectedAreaId, timescale, startDate)
+  )
 
   useEffect(() => {
     if (defaultTimes) {
@@ -143,11 +157,15 @@ export const FocusView = ({ defaultTimes, setDefaultTimes }: { defaultTimes: boo
       <TimeSection 
         timescale={timescale}
         jumpToTimescale={jumpToTimescale}
+        entries={getEntriesForTimescale(timescale)}
+        fetchEntries={fetchEntries}
       />
       : <TimeSection 
         timescale={timescale}
         startDate={startDate}
         jumpToTimescale={jumpToTimescale}
+        entries={getEntriesForTimescale(timescale, startDate)}
+        fetchEntries={fetchEntries}
       />
     }
 
@@ -156,6 +174,8 @@ export const FocusView = ({ defaultTimes, setDefaultTimes }: { defaultTimes: boo
         isCurrentFocus={false}
         timescale={broaderTimescale}
         jumpToTimescale={jumpToTimescale}
+        entries={getEntriesForTimescale(broaderTimescale)}
+        fetchEntries={fetchEntries}
       />}
     {broaderTimescale && broaderTimescale !== 'life' &&
       <TimeSection 
@@ -163,6 +183,8 @@ export const FocusView = ({ defaultTimes, setDefaultTimes }: { defaultTimes: boo
         timescale={broaderTimescale}
         jumpToTimescale={jumpToTimescale}
         startDate={getBroaderTimescaleStart()}
+        entries={getEntriesForTimescale(broaderTimescale, getBroaderTimescaleStart())}
+        fetchEntries={fetchEntries}
       />
     }
   </>

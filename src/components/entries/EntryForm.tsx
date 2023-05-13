@@ -2,7 +2,7 @@ import { useState, useContext, useRef, FormEvent } from 'react';
 
 import { UserContext, DataContext } from '../../App';
 import { Area, Entry, Data, Timescale, UserContextInterface } from '../../utilities/interfaces';
-import { backend } from '../../utilities/backend';
+import { backend } from '../../utilities/utils';
 
 import { EntryFormUI } from './EntryFormUI';
 

@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import { SettingsContext } from '../../App';
 import { Area, Settings } from '../../utilities/interfaces';
-import { backend } from '../../utilities/backend';
+import { backend } from '../../utilities/utils';
 
 interface EditableAreaProps {
     area: Area,
