@@ -9,7 +9,7 @@ import './styles/EntryForm.scss';
 import './styles/AreaForm.scss';
 import './styles/AllTime.scss';
 import { backend } from './utilities/backend';
-import { Entry, Area } from './utilities/interfaces';
+import { Area } from './utilities/interfaces';
 
 import { Header } from './components/Header';
 import { SignIn } from './components/SignIn';
@@ -28,19 +28,8 @@ function App() {
   const [defaultTimes, setDefaultTimes] = useState(false);
   const navigate = useNavigate();
 
-  const [entries, setEntries] = useState([] as Array<Entry>);
   const [areas, setAreas] = useState([] as Array<Area>);
   const [selectedAreaId, setSelectedAreaId] = useState('');
-  const entriesInSelectedArea = entries.filter(entry => {
-    const idsOfchildrenOfSelectedArea = areas.filter(area => area.parent === selectedAreaId).map(area => area._id);
-    const isInChildOfSelectedArea = entry.areaId && idsOfchildrenOfSelectedArea.includes(entry.areaId);
-    return !selectedAreaId || 
-      (entry.areaId && (entry.areaId.includes(selectedAreaId) || isInChildOfSelectedArea))});
-  
-  const fetchEntries = async () => {
-    const entriesResponse = await backend.get('entry', { params: { userId } });
-    setEntries(entriesResponse.data);
-  }
 
   const fetchAreas = async () => {
     const areasResponse = await backend.get('area', { params: { userId } });
@@ -48,10 +37,7 @@ function App() {
   }
 
   useEffect(() => {
-    if (userId) {
-      fetchAreas();
-      fetchEntries();
-    }
+    if (userId) fetchAreas()
   }, [userId])
 
   const PageWrapper = ({ children }: { children: any }) => {
@@ -68,8 +54,8 @@ function App() {
   return (
     <>
     <UserContext.Provider value={{ userId, setUserId }}>
-    <DataContext.Provider value={{ areas, selectedAreaId, entries: entriesInSelectedArea }}>
-    <SettingsContext.Provider value={{ fetchEntries, fetchAreas, setDefaultTimes }}>
+    <DataContext.Provider value={{ areas, selectedAreaId }}>
+    <SettingsContext.Provider value={{ fetchAreas, setDefaultTimes }}>
     <Header />
     <main>
       {!userId && <SignIn />}
@@ -80,8 +66,8 @@ function App() {
           <FocusView defaultTimes={defaultTimes} setDefaultTimes={setDefaultTimes} />} />} />
         <Route path='/all-time' element={<PageWrapper children={<AllTime/>} />} />
         <Route path='/manage-areas' element={<ManageAreas />} />
-        <Route path='/new-goal' element={<EntryForm selectedType='goal' dismissForm={() => { fetchEntries(); navigate(-1); }} />} />
-        <Route path='/new-note' element={<EntryForm selectedType='note' dismissForm={() => { fetchEntries(); navigate(-1); }}/>} />
+        <Route path='/new-goal' element={<EntryForm selectedType='goal' dismissForm={() => navigate(-1) } />} />
+        <Route path='/new-note' element={<EntryForm selectedType='note' dismissForm={() => navigate(-1) }/>} />
       </Routes>
     </>)
       }

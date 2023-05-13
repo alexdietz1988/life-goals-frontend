@@ -1,15 +1,23 @@
-import { Fragment, useState, useContext } from 'react';
+import { Fragment, useState, useContext, useEffect } from 'react';
 import _ from 'lodash';
 
-import { DataContext } from '../../App';
-import { Data, Timescale } from '../../utilities/interfaces';
+import { UserContext } from '../../App';
+import { Timescale, Entry, UserContextInterface } from '../../utilities/interfaces';
 import { timescales, getDate } from '../../utilities/dates';
 import { TimeSection } from './TimeSection';
+import { backend } from '../../utilities/backend';
 
 export const AllTime = () => {
-    const { entries } = useContext(DataContext) as Data;
     const [relativeTimesToShow, setRelativeTimesToShow] = useState({ past: false, present: true, future: true });
     const [selectedTimescale, setSelectedTimescale] = useState('');
+
+    const { userId } = useContext(UserContext) as UserContextInterface;
+    const [entries, setEntries] = useState<Entry[]>([]);
+    const fetchEntries = async () => {
+        const response = await backend.get('entry', { params: { userId } });
+        setEntries(response.data);
+    }
+    useEffect(() => {fetchEntries();}, [userId])
 
     const startDatesToDisplay = {
         day: [] as Date[],
@@ -59,7 +67,7 @@ export const AllTime = () => {
         return (datesForTimescale.length === 0) ? <></>
             : datesForTimescale.map((d, i) => (
                 <Fragment key={i}>
-                    <TimeSection timescale={timescale} startDate={d} />
+                    <TimeSection timescale={timescale} startDate={d} entries={entries} fetchEntries={fetchEntries} />
                 </Fragment>)
         )
     }
@@ -96,7 +104,7 @@ export const AllTime = () => {
         {(entries.filter(e => !e.timescale).length > 0 && 
             relativeTimesToShow.present && 
             (!selectedTimescale || selectedTimescale === 'anytime')) && 
-            <TimeSection />}
+            <TimeSection entries={entries} fetchEntries={fetchEntries} />}
         
         {timescales.map((t, i) => {
                 if (startDatesToDisplay[t as keyof typeof startDatesToDisplay].length === 0) return <Fragment key={i}></Fragment>;
@@ -122,11 +130,11 @@ export const AllTime = () => {
                     </h2>
                 </div>
             </div>
-            <TimeSection timescale='life'/>
+            <TimeSection timescale='life' entries={entries} fetchEntries={fetchEntries} />
         </div>}
 
         {(entries.filter(e => e.someday).length > 0 && relativeTimesToShow.future && 
             (!selectedTimescale || selectedTimescale === 'someday')) && 
-            <TimeSection someday={true} />}
+            <TimeSection someday={true} entries={entries} fetchEntries={fetchEntries} />}
         </>)
 }

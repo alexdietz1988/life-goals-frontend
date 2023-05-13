@@ -1,8 +1,7 @@
-import { Fragment, useState, useEffect, useContext } from 'react';
+import { Fragment, useState, useContext } from 'react';
 
-import { UserContext, DataContext } from '../../App';
-import { backend } from '../../utilities/backend';
-import { Entry, Data, UserContextInterface, Timescale } from '../../utilities/interfaces';
+import { DataContext } from '../../App';
+import { Entry, Data, Timescale } from '../../utilities/interfaces';
 import { getDateLabel } from '../../utilities/dates';
 import { EntryForm } from './EntryForm';
 import { RenderEntry } from './RenderEntry';
@@ -13,22 +12,15 @@ interface TimeSectionProps {
     someday?: boolean,
     startDate?: Date,
     jumpToTimescale?: Function,
+    entries: Entry[],
+    fetchEntries: Function,
 }
 
-export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jumpToTimescale }: TimeSectionProps) => {
+export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jumpToTimescale, entries, fetchEntries }: TimeSectionProps) => {
     const [entryIdToEdit, setEntryIdToEdit] = useState('');
     const [showEntryForm, setShowEntryForm] = useState(false);
     const [entryFormType, setEntryFormType] = useState< 'goal' | 'note' | undefined>(undefined);
     const { areas, selectedAreaId } = useContext(DataContext) as Data;
-    const { userId } = useContext(UserContext) as UserContextInterface;
-    const [entries, setEntries] = useState([] as Array<Entry>);
-
-    const fetchEntries = async () => {
-        const entriesResponse = await backend.get('entry', { params: { userId } });
-        setEntries(entriesResponse.data);
-    }
-
-    useEffect(() => {fetchEntries();}, [userId])
 
     const dateMatch = (entry: Entry) => {
         let sameDate = false;
