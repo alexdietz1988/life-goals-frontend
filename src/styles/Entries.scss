@@ -85,15 +85,17 @@
 }
 
 .starred {
-    color: #FFD700;
+    color: rgb(255, 215, 0);
+
+    &:hover {
+        color: rgb(255, 175, 0);
+    }
 }
 
 .unstarred {
     color: hsl(0, 0%, 90%);
-    opacity: 50%;
 
     &:hover {
-        color: #FFD700;
-        opacity: 100%;
+        color:hsl(0, 0%, 75%);
     }
 }

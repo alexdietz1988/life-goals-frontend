@@ -1,10 +1,10 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import { DataContext, SettingsContext } from '../../App';
+import { DataContext } from '../../App';
 import { backend } from '../../utilities/utils';
-import { Entry, Data, Settings } from '../../utilities/interfaces';
+import { Entry, Data } from '../../utilities/interfaces';
 import { getDateLabel } from '../../utilities/dates'
 
 interface RenderEntryProps {
@@ -14,14 +14,15 @@ interface RenderEntryProps {
 
 export const RenderEntry = ({ entry, setEntryIdToEdit }: RenderEntryProps ) => {
     const { areas } = useContext(DataContext) as Data;
-    const { fetchEntries } = useContext(SettingsContext) as Settings;
-    const toggleComplete = async () => {
-        await backend.patch('entry', { entryId: entry._id, complete: !entry.complete })
-        fetchEntries();
+    const [isComplete, setIsComplete] = useState<boolean>(Boolean(entry.complete));
+    const [isStarred, setIsStarred] = useState<boolean>(Boolean(entry.starred));
+    const toggleComplete = () => {
+        backend.patch('entry', { entryId: entry._id, complete: !isComplete });
+        setIsComplete(isComplete => !isComplete);
     }
-    const toggleStarred = async () => {
-        await backend.patch('entry', { entryId: entry._id, starred: !entry.starred })
-        fetchEntries();
+    const toggleStarred = () => {
+        backend.patch('entry', { entryId: entry._id, starred: !isStarred });
+        setIsStarred(isStarred => !isStarred);
     }
 
     const renderAreaLabel = (areaId: string) => {
@@ -36,8 +37,8 @@ export const RenderEntry = ({ entry, setEntryIdToEdit }: RenderEntryProps ) => {
         <div className='goal'>
             <div className='hoverable left-container'>
                 {entry.type === 'goal' && <div className='icon-container'>
-                    <span className='icon' onClick={toggleStarred}><i className={'fas fa-star ' + (entry.starred ? 'starred' : 'unstarred')}/></span>
-                    <input type='checkbox' checked={entry.complete} onChange={toggleComplete}/>
+                    <span className='icon' onClick={toggleStarred}><i className={'fas fa-star ' + (isStarred ? 'starred' : 'unstarred')}/></span>
+                    <input type='checkbox' defaultChecked={entry.complete} onClick={toggleComplete}/>
                 </div>}
                 <div className={'goal-label'} onClick={() => setEntryIdToEdit(entry._id)}><ReactMarkdown children={entry.primaryText ? entry.primaryText : ''} /></div>
             </div>
