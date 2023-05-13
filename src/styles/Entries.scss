@@ -65,6 +65,10 @@
     font-size: smaller;
 }
 
+.tag:hover {
+    background-color: lightgray;
+}
+
 .time-section {
     .header {
         display: flex;

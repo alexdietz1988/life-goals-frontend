@@ -23,9 +23,10 @@ export interface Area {
 }
 
 export interface Data {
+    areas: Array<Area>,
     entries: Array<Entry>,
     selectedAreaId: string,
-    areas: Array<Area>,
+    setSelectedAreaId: Function,
 }
 
 export interface UserContextInterface {

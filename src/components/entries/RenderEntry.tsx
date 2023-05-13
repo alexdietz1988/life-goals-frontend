@@ -13,7 +13,7 @@ interface RenderEntryProps {
 }
 
 export const RenderEntry = ({ entry, setEntryIdToEdit }: RenderEntryProps ) => {
-    const { areas } = useContext(DataContext) as Data;
+    const { areas, setSelectedAreaId } = useContext(DataContext) as Data;
     const [isComplete, setIsComplete] = useState<boolean>(Boolean(entry.complete));
     const [isStarred, setIsStarred] = useState<boolean>(Boolean(entry.starred));
     const toggleComplete = () => {
@@ -28,7 +28,7 @@ export const RenderEntry = ({ entry, setEntryIdToEdit }: RenderEntryProps ) => {
     const renderAreaLabel = (areaId: string) => {
         const foundArea = areas.find(area => area._id === areaId);
         return foundArea && (
-            <span key={areaId} className='tag'>
+            <span key={areaId} className='tag hoverable' onClick={() => setSelectedAreaId(areaId)}>
                 <p>{foundArea.label}</p>
             </span>)
     }
@@ -38,7 +38,7 @@ export const RenderEntry = ({ entry, setEntryIdToEdit }: RenderEntryProps ) => {
             <div className='hoverable left-container'>
                 {entry.type === 'goal' && <div className='icon-container'>
                     <span className='icon' onClick={toggleStarred}><i className={'fas fa-star ' + (isStarred ? 'starred' : 'unstarred')}/></span>
-                    <input type='checkbox' defaultChecked={entry.complete} onClick={toggleComplete}/>
+                    <input className='hoverable' type='checkbox' defaultChecked={entry.complete} onClick={toggleComplete}/>
                 </div>}
                 <div className={'goal-label'} onClick={() => setEntryIdToEdit(entry._id)}><ReactMarkdown children={entry.primaryText ? entry.primaryText : ''} /></div>
             </div>

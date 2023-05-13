@@ -54,7 +54,7 @@ function App() {
   return (
     <>
     <UserContext.Provider value={{ userId, setUserId }}>
-    <DataContext.Provider value={{ areas, selectedAreaId }}>
+    <DataContext.Provider value={{ areas, selectedAreaId, setSelectedAreaId }}>
     <SettingsContext.Provider value={{ fetchAreas, setDefaultTimes }}>
     <Header />
     <main>
