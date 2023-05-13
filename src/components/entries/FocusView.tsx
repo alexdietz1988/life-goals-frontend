@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { timescales } from '../../utilities/dates';
 import { Timescale, Entry, UserContextInterface } from '../../utilities/interfaces';
 import { TimeSection } from './TimeSection';
-import { backend } from '../../utilities/backend';
+import { backend } from '../../utilities/utils';
 import { UserContext } from '../../App';
 
 export const FocusView = ({ defaultTimes, setDefaultTimes }: { defaultTimes: boolean, setDefaultTimes: Function }) => {

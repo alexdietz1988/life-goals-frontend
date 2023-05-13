@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 import { DataContext, SettingsContext } from '../../App';
-import { backend } from '../../utilities/backend';
+import { backend } from '../../utilities/utils';
 import { Entry, Data, Settings } from '../../utilities/interfaces';
 import { getDateLabel } from '../../utilities/dates'
 

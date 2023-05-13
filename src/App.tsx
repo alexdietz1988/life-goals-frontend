@@ -8,7 +8,7 @@ import './styles/Entries.scss';
 import './styles/EntryForm.scss';
 import './styles/AreaForm.scss';
 import './styles/AllTime.scss';
-import { backend } from './utilities/backend';
+import { backend } from './utilities/utils';
 import { Area } from './utilities/interfaces';
 
 import { Header } from './components/Header';
