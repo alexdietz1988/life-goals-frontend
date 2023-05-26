@@ -8,6 +8,7 @@ import './styles/Entries.scss';
 import './styles/EntryForm.scss';
 import './styles/AreaForm.scss';
 import './styles/AllTime.scss';
+import './styles/Dashboard.scss';
 import { backend } from './utilities/utils';
 import { Area } from './utilities/interfaces';
 
@@ -18,6 +19,7 @@ import { ManageAreas } from './components/areas/ManageAreas';
 import { EntryForm } from './components/entries/EntryForm';
 import { AllTime } from './components/entries/AllTime';
 import { FocusView } from'./components/entries/FocusView';
+import { Dashboard } from './components/Dashboard';
 
 export const UserContext = createContext({});
 export const DataContext = createContext({});
@@ -66,6 +68,7 @@ function App() {
           <FocusView defaultTimes={defaultTimes} setDefaultTimes={setDefaultTimes} />} />} />
         <Route path='/all-time' element={<PageWrapper children={<AllTime/>} />} />
         <Route path='/manage-areas' element={<ManageAreas />} />
+        <Route path='/dashboard' element={<Dashboard />}/>
         <Route path='/new-goal' element={<EntryForm selectedType='goal' dismissForm={() => navigate(-1) } />} />
         <Route path='/new-note' element={<EntryForm selectedType='note' dismissForm={() => navigate(-1) }/>} />
       </Routes>
