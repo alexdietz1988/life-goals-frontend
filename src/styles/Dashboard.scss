@@ -1,0 +1,24 @@
+.dashboard {
+    margin-block: 20px;
+    padding: 10px;
+}
+
+.dashboard--area {
+    @media screen and (min-width: 400px) {
+        columns: 2;
+    }
+}
+
+.dashboard--area-goals {
+    height: 200px;
+    overflow: scroll;
+}
+
+.dashboard--section {
+    margin-bottom: 50px;
+}
+
+.dashboard--child-area > div {
+    margin-top: 20px;
+    background-color: hsl(0, 0%, 95%);
+}

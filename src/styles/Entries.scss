@@ -30,9 +30,17 @@
             }
         }
 
+        .icon-container--compact {
+            width: auto;
+        }
+
         .goal-label {
             display: inline;
             padding-right: 10px;
+        }
+
+        .goal-label--compact {
+            font-size: small;
         }
     }
     .area-tag {
@@ -45,7 +53,7 @@
         }
 
         .tag {
-            max-width: 100%;
+            max-width: fit-content;
             display: flex;
             justify-content: flex-start;
             

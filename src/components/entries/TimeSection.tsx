@@ -13,9 +13,10 @@ interface TimeSectionProps {
     jumpToTimescale?: Function,
     entries: Entry[],
     fetchEntries: Function,
+    compact?: boolean,
 }
 
-export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jumpToTimescale, entries, fetchEntries }: TimeSectionProps) => {
+export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jumpToTimescale, entries, fetchEntries, compact }: TimeSectionProps) => {
     const [entryIdToEdit, setEntryIdToEdit] = useState('');
     const [showEntryForm, setShowEntryForm] = useState(false);
     const [entryFormType, setEntryFormType] = useState< 'goal' | 'note' | undefined>(undefined);
@@ -35,7 +36,8 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
             }}/>
         : <RenderEntry 
             entry={entry}
-            setEntryIdToEdit={setEntryIdToEdit}/>}
+            setEntryIdToEdit={setEntryIdToEdit}
+            compact={compact}/>}
         </Fragment>)
 
     const handleToggleEntryForm = (type: 'goal' | 'note'): void => {
@@ -51,9 +53,9 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
     }
 
     return (
-    <div className='box time-section'>
+    <div className={'time-section ' + (!compact && 'box')}>
 
-        <div className='block header'>
+        {!compact && <div className='block header'>
             <h2 className={'time-section-title is-inline is-5 mr-3 ' + (isCurrentFocus === false && 'hoverable has-text-link')} onClick={() => {
                 if (jumpToTimescale && isCurrentFocus === false) jumpToTimescale(timescale)}
                 }>{getDateLabel(startDate, timescale, someday)}</h2>
@@ -63,7 +65,7 @@ export const TimeSection = ({ isCurrentFocus, timescale, someday, startDate, jum
             <div className='button new-entry-button' onClick={() => handleToggleEntryForm('note')}>
                 <span className='icon'><i className='fa-regular fa-note-sticky' /></span>
             </div>
-        </div>
+        </div>}
 
         {showEntryForm && <EntryForm 
             selectedType={entryFormType} 

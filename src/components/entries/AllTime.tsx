@@ -7,8 +7,8 @@ import { timescales, getDate } from '../../utilities/dates';
 import { TimeSection } from './TimeSection';
 import { backend, filterEntries } from '../../utilities/utils';
 
-export const AllTime = () => {
-    const [relativeTimesToShow, setRelativeTimesToShow] = useState({ past: false, present: true, future: true });
+export const AllTime = ({ compact, areaId }: { compact?: boolean, areaId?: string } ) => {
+    const [relativeTimesToShow, setRelativeTimesToShow] = useState(compact ? { past: false, present: true, future: false } : { past: false, present: true, future: true });
     const [selectedTimescale, setSelectedTimescale] = useState('');
 
     const { userId } = useContext(UserContext) as UserContextInterface;
@@ -18,8 +18,11 @@ export const AllTime = () => {
         setEntries(response.data);
     }
     useEffect(() => {fetchEntries();}, [userId])
-    
-    const { areas, selectedAreaId } = useContext(DataContext) as Data;
+
+    const data = useContext(DataContext) as Data;
+    const { areas } = data;
+    const selectedAreaId = areaId ? areaId : data.selectedAreaId;
+
     const getEntriesForTimescale = (timescale?: string, startDate?: Date, someday?: boolean) => {
         return (filterEntries(areas, entries, selectedAreaId, timescale, startDate, someday));
     }
@@ -84,14 +87,15 @@ export const AllTime = () => {
                             timescale={timescale} 
                             startDate={d} 
                             fetchEntries={fetchEntries} 
-                            entries={entriesForTimeSection} />}
+                            entries={entriesForTimeSection} 
+                            compact={compact} />}
                 </Fragment>
             );} )
     }
 
     return (
         <>
-        <div className='block all-time-header'>
+        {!compact && <div className='block all-time-header'>
             <div className='buttons'>
                 {['past', 'present', 'future'].map((relativeTime, i) => {
                     const showRelativeTime = relativeTimesToShow[relativeTime as keyof typeof relativeTimesToShow];
@@ -116,38 +120,38 @@ export const AllTime = () => {
                 </select>
             </div>
             
-        </div>
+        </div>}
 
         {(specialEntries.anytime.length > 0 && relativeTimesToShow.present && 
             (!selectedTimescale || selectedTimescale === 'anytime')) && 
-            <TimeSection fetchEntries={fetchEntries} entries={specialEntries.anytime}/>}
+            <TimeSection fetchEntries={fetchEntries} entries={specialEntries.anytime} compact={compact} />}
         
         {timescales.map((t, i) => {
                 if (startDatesToDisplay[t as keyof typeof startDatesToDisplay].length === 0) return <Fragment key={i}></Fragment>;
                 return (
-                <div key={i} className='block my-6'>
-                    <div className='block'>
+                <div key={i} className={'' + (!compact && 'block my-6')}>
+                    {!compact && <div className='block'>
                         <h2 className='title is-5 has-text-info timescale-label'>
                             {_.capitalize(t) + 's'}
                         </h2>
-                    </div>
+                    </div>}
                     {renderTimescale(t)}
                 </div>)}
         )}
 
         {(specialEntries.life.length > 0 && relativeTimesToShow.present && (!selectedTimescale || selectedTimescale === 'life')) && 
-        <div className='block my-6'>
-            <div className='block'>
+        <div className={'' + (!compact && 'block my-6')}>
+            {!compact && <div className='block'>
                 <div className='block'>
                     <h2 className='title is-5 has-text-info timescale-label'>
                         Life
                     </h2>
                 </div>
-            </div>
-            <TimeSection timescale='life' fetchEntries={fetchEntries} entries={specialEntries.life} />
+            </div>}
+            <TimeSection timescale='life' fetchEntries={fetchEntries} entries={specialEntries.life} compact={compact} />
         </div>}
 
         {(specialEntries.someday.length > 0 && relativeTimesToShow.future && (!selectedTimescale || selectedTimescale === 'someday')) && 
-            <TimeSection someday={true} fetchEntries={fetchEntries} entries={specialEntries.someday} />}
+            <TimeSection someday={true} fetchEntries={fetchEntries} entries={specialEntries.someday} compact={compact} />}
         </>)
 }

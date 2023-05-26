@@ -33,13 +33,14 @@ export const Header = () => {
 
             <nav className='mobile-only'>
                 <div className='navbar-item button'><Link to='/' onClick={() => setDefaultTimes(true)}>Now</Link></div>
+                <div className='navbar-item button'><Link to='/all-time'>All Time</Link></div>
+                <div className='navbar-item'><Link to='/dashboard' className=''>Dashboard</Link></div>
                 <div className='navbar-item new-entry-buttons'>
                     <Link to={path === '/new-goal' ? '/' : '/new-goal'} className='button is-primary new-entry-button mr-1'>+</Link>
                     <Link to={path === '/new-note' ? '/' : '/new-note'} className='button is-warning new-entry-button'>
                         <span className='icon'><i className='fa-regular fa-note-sticky' /></span>
                     </Link>
                 </div>
-                <div className='navbar-item button'><Link to='/all-time'>All Time</Link></div>
             </nav>
 
             <nav className='desktop-only'>
@@ -47,6 +48,7 @@ export const Header = () => {
                     <div className='navbar-item'><Link to='/' className='title-desktop'>Life Goals</Link></div>
                     <div className='navbar-item'><Link to='/' onClick={() => setDefaultTimes(true)}>Now</Link></div>
                     <div className='navbar-item'><Link to='/all-time' className=''>All Time</Link></div>
+                    <div className='navbar-item'><Link to='/dashboard' className=''>Dashboard</Link></div>
                     <div className='navbar-item new-entry-button'>
                         <Link to={path === '/new-goal' ? '/' : '/new-goal'} className='button is-primary'>
                             +

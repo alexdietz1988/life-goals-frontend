@@ -15,7 +15,7 @@ interface AreaInfoInterface {
     notes: string,
 }
 
-export const AreaInfo = ({ selectedAreaId }: { selectedAreaId: string}) => {
+export const AreaInfo = ({ selectedAreaId, compact }: { selectedAreaId: string, compact?: boolean}) => {
     const { areas } = useContext(DataContext) as Data;
     const areaLabel = areas.find(area => area._id === selectedAreaId)?.label;
     const [isEditing, setIsEditing] = useState(false);
@@ -45,7 +45,7 @@ export const AreaInfo = ({ selectedAreaId }: { selectedAreaId: string}) => {
     return (
     <>
         {(!isEditing && areaInfo) &&
-        <div className='box area-info' onClick={() => setIsEditing(true)}>
+        <div className={'area-info ' + (!compact && 'box')} onClick={() => setIsEditing(true)}>
             <div className='area-info-label'>
                 <div className='area-label'>{areaLabel}</div>
                 <div className={`tag is-medium hoverable ${getClassName(areaInfo.areaStatus)}`}>
